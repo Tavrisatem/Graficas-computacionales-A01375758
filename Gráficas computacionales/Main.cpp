@@ -1,7 +1,9 @@
-//Luis Fernndo Espinosa Elizalde A01375758
+/*//Luis Fernndo Espinosa Elizalde A01375758
 //Graficas computacionales
 //Tarea 1: Ejercicios simples para aprender C++
 #include <iostream>
+#include "Circle.h"
+#include "Employee.h"
 
 //Metodo para sacar perimetro de rectangulo con formula 2*base + 2*altura, regresa un valor entero
 int PerimetroRectangulo(int base, int altura) {
@@ -165,6 +167,71 @@ int main() {
 	std::cout << "Resultado de si es primo: " << primo << "\n\n"; //Imprime variable primo, 1 es true y 0 es false
 	primo = EsPrimo(52); //Llama la función, regresa tru o false
 	std::cout << "Resultado de si es primo: " <<  primo << "\n\n"; //Imprime variable primo, 1 es true y 0 es false
+
+	Circle circulo;
+	//Circle circulo2(2.0, "green");
+	std::cout << circulo.GetRadius() << circulo.GetColor() << circulo.GetArea() << std::endl;
+	Employee empleado(13, "Luis", "Espinosa", 50000);
+	
+	std::cout << empleado.GetFirstName() << std::endl;
+	std::cout << empleado.GetLastName() << std::endl;
+	std::cout << empleado.GetName() << std::endl;
+	std::cout << empleado.GetID() << std::endl;
+	std::cout << empleado.GetSalary() << std::endl;
+	std::cout << empleado.GetAnualSalary() << std::endl;
+	std::cout << empleado.RaiseSalary(50) << std::endl;
+	std::cout << empleado.Print() << std::endl;
+
 	std::cin.get(); //Espera señal para cerrar consola
+	return 0;
+}*/
+
+#include <GL/glew.h>
+#include <GL/freeglut.h>
+
+void GameLoop() {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//WARNING!!!! Esto es OpenGL viejito. Solamente lo vamos a ocupar esta clase.
+	//Prohibido el resto del sementre.
+	glBegin(GL_TRIANGLES);
+	glColor3f(1.0f, 0.0f, 0.0f);
+	glVertex2f(-1.0f,-1.0f);
+	glColor3f(0.0f, 1.0f, 0.0f);
+	glVertex2f(1.0f, -1.0f);
+	glColor3f(0.0f, 0.0f, 1.0f);
+	glVertex2f(0.0f, 1.0f);
+	glEnd();
+	glutSwapBuffers();
+}
+
+int main(int argc, char* argv[]) {
+	//Iniciar fleegut
+	//Freeglut se encarga de crear ventanas
+	// en donde podemos dibujar
+	glutInit(&argc, argv);
+	//Iniciar el contexto de OpenGL. El contexto se refiere a las capacidades que va a tener nuestra aplicación gráfica.
+	//En este caso estamos trabajando con el pipeline clasico.
+	glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
+	//Freeglut nos permite configurar eventos que ocurren en la ventana.
+	//Un evento que nos interesa es cuando alguien cierra la ventana.
+	//En este caso, dejamos de renderear la escena y terminamos el programa.
+	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
+	//Configuramos el frame buffer . En este caso estamos solicitando un buffer true color RGBA, un buffer de profundidad
+	//y un segundo buffer para renderear.
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
+	//Imiciar las dimensiones de la ventana (en pixeles)
+	glutInitWindowSize(400, 400);
+	//Creamos la ventana y le damos un titulo
+	glutCreateWindow("Hello world GL");
+	//Asociamos una funcion de render. Esta funcion se llamara para dibujar un frame.
+	glutDisplayFunc(GameLoop);
+	//Inicializamos GLEW. Esta libreria se encarga de obtener el API de OpenGL de nuestra targeta de video.
+	//Shame on you Microsoft
+	glewInit();
+	//Configurar OpenGL. Este es el color por default del buffer de color en el framebuffer.
+	glClearColor(1.0f, 1.0f, 0.5f, 1.0f);
+	//Iniciar la aplicacion. El main se pausara 
+	glutMainLoop();
+
 	return 0;
 }
