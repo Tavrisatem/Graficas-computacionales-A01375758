@@ -184,7 +184,7 @@ int main() {
 
 	std::cin.get(); //Espera señal para cerrar consola
 	return 0;
-}*/
+}
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -234,4 +234,30 @@ int main(int argc, char* argv[]) {
 	glutMainLoop();
 
 	return 0;
+}*/
+
+//Luis Fernndo Espinosa Elizalde A01375758
+//Graficas computacionales
+//Tarea 2: Ejercicios de lectura de archivos C++
+//Librerias
+#include <iostream>
+#include <string>
+//Headders: InputFiles.h
+#include "InputFile.h"
+
+
+//Metodo principal
+int main(int argc, char* argv[])
+{
+	std::string filename = "Prueba.txt"; //Prueba.txt
+	InputFile myFile; //Archivo que se va a abrir
+	myFile.Read(filename); //Llama la funcion que lee un archivo de texto
+	std::string contents = myFile.GetContents(); //Cargar los datos del contenido del archivo Pruebas.txt en un string
+	std::cout << "Contents: " << contents; //Imprimir datos en pantalla
+	myFile.Read("Error.txt"); //Llama la funcion que lee un archivo de texto
+	//Probar un caso de ERROR
+	contents = myFile.GetContents(); //Cargar los datos del contenido del archivo Error.txt en un string, va a regresar una cadena vacia
+	std::cout << "Contents: " << contents; //Imprimir datos en pantalla
+	std::cin.get(); //Esperar input para terminar
+	return 0; //Terminar funcion principal
 }

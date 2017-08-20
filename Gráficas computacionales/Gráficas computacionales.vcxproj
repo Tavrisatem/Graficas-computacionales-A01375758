@@ -118,6 +118,7 @@
   <ItemGroup>
     <ClCompile Include="Circle.cpp" />
     <ClCompile Include="Employee.cpp" />
+    <ClCompile Include="InputFile.cpp" />
     <ClCompile Include="Main.cpp">
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">CompileAsCpp</CompileAs>
     </ClCompile>
@@ -126,7 +127,11 @@
   <ItemGroup>
     <ClInclude Include="Circle.h" />
     <ClInclude Include="Employee.h" />
+    <ClInclude Include="InputFile.h" />
     <ClInclude Include="Rectangle.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Prueba.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
