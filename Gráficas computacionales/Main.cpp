@@ -184,14 +184,56 @@ int main() {
 
 	std::cin.get(); //Espera señal para cerrar consola
 	return 0;
-}
+}*/
 
 #include <GL/glew.h>
 #include <GL/freeglut.h>
+#include <iostream>
+#include <glm/glm.hpp>
+#include <vector>
+
+//Identificador del manager al que vamos a asociar todos los VBOs
+GLuint vao;
+
+void Initialize() {
+	//Creando toda la memoria que el programa va a utilizar
+	
+	//Creación del atributo de posiciones de estos vertices. Lista de vec2.
+	//Claramente en CPU y RAM
+	std::vector<glm::vec2> positions;
+	positions.push_back(glm::vec2(0.5f, -0.5f));
+	positions.push_back(glm::vec2(0.5f, 0.5f));
+	positions.push_back(glm::vec2(-0.5f, -0.5f));
+	positions.push_back(glm::vec2(-0.5f, 0.5f));
+	
+	//Queremos generar 1 manager
+	glGenVertexArrays(1, &vao);
+	//Utilizar el vao. Apartir de este momento, todos los VBOs creados y configurados se van a asociar a este manager
+	glBindVertexArray(vao);
+
+	//Identificador de VBO de posiciones
+	GLuint positionsVBO;
+	//Creacion de VBO de posiciones
+	glGenBuffers(1, &positionsVBO);
+	//Activamos el buffer de posiciones para poder utilizarlo
+	glBindBuffer(GL_ARRAY_BUFFER, positionsVBO);
+	//Creamos la memoria y la inicializamos con los datos del aributo de posiciones
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2)*positions.size(), positions.data(), GL_STATIC_DRAW);
+	// Activamos el atributo en l targeta de video
+	glEnableVertexAttribArray(0);
+	// Configuramos los datos del atributo en la target de video
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+	// Ya no vamos a utilizar este VBO en este  momento.
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	//Desactivamos el manager.
+	glBindVertexArray(0);
+}
 
 void GameLoop() {
+	//Limpimos el buffer de color y el buffer de profundidad. Siempre hacerlo al inicio del frame.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//WARNING!!!! Esto es OpenGL viejito. Solamente lo vamos a ocupar esta clase.
+	/*/WARNING!!!! Esto es OpenGL viejito. Solamente lo vamos a ocupar esta clase.
 	//Prohibido el resto del sementre.
 	glBegin(GL_TRIANGLES);
 	glColor3f(1.0f, 0.0f, 0.0f);
@@ -200,7 +242,16 @@ void GameLoop() {
 	glVertex2f(1.0f, -1.0f);
 	glColor3f(0.0f, 0.0f, 1.0f);
 	glVertex2f(0.0f, 1.0f);
-	glEnd();
+	glEnd();*/
+
+	//Activamos el manager y en este momento se activan todos los VBOs asociados automáticamente.
+	glBindVertexArray(vao);
+	//Función de dibujado sin índices
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	//Terminamos de utilizar el manager
+	glBindVertexArray(0);
+
+	//Cuando terminamos de renderear, cambiamos los buffers.
 	glutSwapBuffers();
 }
 
@@ -209,9 +260,13 @@ int main(int argc, char* argv[]) {
 	//Freeglut se encarga de crear ventanas
 	// en donde podemos dibujar
 	glutInit(&argc, argv);
+	//Solicitando una versión específica de OpenGL
+	glutInitContextVersion(4, 2);
 	//Iniciar el contexto de OpenGL. El contexto se refiere a las capacidades que va a tener nuestra aplicación gráfica.
 	//En este caso estamos trabajando con el pipeline clasico.
-	glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
+	//glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);///
+	//En este caso estamos trabajando con el pipeline PROGRAMABLE.
+	glutInitContextProfile(GLUT_CORE_PROFILE);
 	//Freeglut nos permite configurar eventos que ocurren en la ventana.
 	//Un evento que nos interesa es cuando alguien cierra la ventana.
 	//En este caso, dejamos de renderear la escena y terminamos el programa.
@@ -230,12 +285,20 @@ int main(int argc, char* argv[]) {
 	glewInit();
 	//Configurar OpenGL. Este es el color por default del buffer de color en el framebuffer.
 	glClearColor(1.0f, 1.0f, 0.5f, 1.0f);
+
+	std::cout << glGetString(GL_VERSION) << std::endl;
+
+	//Configuración inicial de nuetro programa. 
+	Initialize();
+
 	//Iniciar la aplicacion. El main se pausara 
 	glutMainLoop();
 
 	return 0;
-}*/
+}
 
+
+/*
 //Luis Fernndo Espinosa Elizalde A01375758
 //Graficas computacionales
 //Tarea 2: Ejercicios de lectura de archivos C++
@@ -260,4 +323,4 @@ int main(int argc, char* argv[])
 	std::cout << "Contents: " << contents; //Imprimir datos en pantalla
 	std::cin.get(); //Esperar input para terminar
 	return 0; //Terminar funcion principal
-}
+}*/
