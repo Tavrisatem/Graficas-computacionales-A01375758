@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Archivos de código fuente\Shadders">
+      <UniqueIdentifier>{93cea207-b92a-446d-95b1-cba104b78bb4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -47,5 +50,19 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Prueba.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Default.frag">
+      <Filter>Archivos de código fuente\Shadders</Filter>
+    </None>
+    <None Include="Default.vert">
+      <Filter>Archivos de código fuente\Shadders</Filter>
+    </None>
+    <None Include="DiscardCenter.vert">
+      <Filter>Archivos de código fuente\Shadders</Filter>
+    </None>
+    <None Include="DiscardCenter.frag">
+      <Filter>Archivos de código fuente\Shadders</Filter>
+    </None>
   </ItemGroup>
 </Project>

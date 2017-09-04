@@ -191,20 +191,38 @@ int main() {
 #include <iostream>
 #include <glm/glm.hpp>
 #include <vector>
+#include "InputFile.h"
 
 //Identificador del manager al que vamos a asociar todos los VBOs
 GLuint vao;
 
+//Identificador del manager de los shaders (shaderProgram)
+GLuint shaderProgram;
+
 void Initialize() {
 	//Creando toda la memoria que el programa va a utilizar
-	
+
 	//Creación del atributo de posiciones de estos vertices. Lista de vec2.
 	//Claramente en CPU y RAM
 	std::vector<glm::vec2> positions;
-	positions.push_back(glm::vec2(0.5f, -0.5f));
-	positions.push_back(glm::vec2(0.5f, 0.5f));
-	positions.push_back(glm::vec2(-0.5f, -0.5f));
-	positions.push_back(glm::vec2(-0.5f, 0.5f));
+	positions.push_back(glm::vec2(0, 0));
+	for (int i = 0; i <= 360; i++) {
+		positions.push_back(glm::vec2(glm::cos(glm::radians((float) i)), glm::sin(glm::radians((float) i))));
+	}
+	//positions.push_back(glm::vec2(0.5f, -0.5f));
+	//positions.push_back(glm::vec2(0.5f, 0.5f));
+	//positions.push_back(glm::vec2(-0.5f, -0.5f));
+	//positions.push_back(glm::vec2(-0.5f, 0.5f));
+
+	std::vector<glm::vec3> colors;
+	colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
+	for (int i = 0; i <= 360; i++) {
+		colors.push_back(glm::vec3(glm::cos(glm::radians((float)i)), glm::sin(glm::radians((float)i)), 0.0f));
+	}
+	//colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+	//colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+	//colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+	//colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
 	
 	//Queremos generar 1 manager
 	glGenVertexArrays(1, &vao);
@@ -219,37 +237,86 @@ void Initialize() {
 	glBindBuffer(GL_ARRAY_BUFFER, positionsVBO);
 	//Creamos la memoria y la inicializamos con los datos del aributo de posiciones
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2)*positions.size(), positions.data(), GL_STATIC_DRAW);
-	// Activamos el atributo en l targeta de video
+	// Activamos el atributo en l tarjeta de video
 	glEnableVertexAttribArray(0);
 	// Configuramos los datos del atributo en la target de video
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 	// Ya no vamos a utilizar este VBO en este  momento.
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+	GLuint colorsVBO;
+	glGenBuffers(1, &colorsVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, colorsVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*colors.size(), colors.data(), GL_STATIC_DRAW);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 	//Desactivamos el manager.
 	glBindVertexArray(0);
+
+	InputFile ifile;
+
+	//VERTEX SHADER
+	//Leemos el archivo Default.vert donde está el código del vertex shader.
+	ifile.Read("DiscardCenter.vert");
+	//Obtenemos el código fuente y lo guardamos en un string.
+	std::string vertexSource = ifile.GetContents();
+	//Creamos un shader de tipo vertex guardamos su identificador en una variable.
+	GLuint vertexShaderHandle = glCreateShader(GL_VERTEX_SHADER);
+	//Obtener los datos en el formato correcto
+	const GLchar *vertexSource_c = (const GLchar*)vertexSource.c_str();
+	//Le estamos dando el código fuente a OpenGl para que se lo asigne al shader
+	glShaderSource(vertexShaderHandle, 1, &vertexSource_c, nullptr);
+	//Compilams el shader en busca de errores.
+	//Vamos a asumir que no hay ningún error.
+	glCompileShader(vertexShaderHandle);
+
+	ifile.Read("DiscardCenter.frag");
+	std::string fragmentSource = ifile.GetContents();
+	GLuint fragmentShaderHandle = glCreateShader(GL_FRAGMENT_SHADER);
+	const GLchar *fragmentSource_c = (const GLchar*)fragmentSource.c_str();
+	glShaderSource(fragmentShaderHandle, 1, &fragmentSource_c, nullptr);
+	glCompileShader(fragmentShaderHandle);
+
+	//Creamos el identificador para el manager de los shader.
+	shaderProgram = glCreateProgram();
+	//Adjuntamos el vertex shader al manager (van a trabajar juntos)
+	glAttachShader(shaderProgram, vertexShaderHandle);
+	//Adjuntamos el fragment shader al manager (van a trabajar juntos)
+	glAttachShader(shaderProgram, fragmentShaderHandle);
+	//Asociamos un buffer con índice 0 (posiciones) a la variable VertexPosition
+	glBindAttribLocation(shaderProgram, 0, "VertexPosition");
+	//Asociamos un buffer con índice 1 (colores) a la variable VertexColor
+	glBindAttribLocation(shaderProgram, 1, "VertexColor");
+	//Ejecutamos el proceso de linker (asegurarnos que el vertex y fragment son compatibles)
+	glLinkProgram(shaderProgram);
 }
 
 void GameLoop() {
 	//Limpimos el buffer de color y el buffer de profundidad. Siempre hacerlo al inicio del frame.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	/*/WARNING!!!! Esto es OpenGL viejito. Solamente lo vamos a ocupar esta clase.
+	//WARNING!!!! Esto es OpenGL viejito. Solamente lo vamos a ocupar esta clase.
 	//Prohibido el resto del sementre.
-	glBegin(GL_TRIANGLES);
-	glColor3f(1.0f, 0.0f, 0.0f);
-	glVertex2f(-1.0f,-1.0f);
-	glColor3f(0.0f, 1.0f, 0.0f);
-	glVertex2f(1.0f, -1.0f);
-	glColor3f(0.0f, 0.0f, 1.0f);
-	glVertex2f(0.0f, 1.0f);
-	glEnd();*/
+	//glBegin(GL_TRIANGLES);
+	//glColor3f(1.0f, 0.0f, 0.0f);
+	//glVertex2f(-1.0f,-1.0f);
+	//glColor3f(0.0f, 1.0f, 0.0f);
+	//glVertex2f(1.0f, -1.0f);
+	//glColor3f(0.0f, 0.0f, 1.0f);
+	//glVertex2f(0.0f, 1.0f);
+	//glEnd();
 
+	// Activamos el vertex shader y el fragment shader utilizando el manager
+	glUseProgram(shaderProgram);
 	//Activamos el manager y en este momento se activan todos los VBOs asociados automáticamente.
 	glBindVertexArray(vao);
 	//Función de dibujado sin índices
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, 362);
 	//Terminamos de utilizar el manager
 	glBindVertexArray(0);
+	//Desactivamos el manager
+	glUseProgram(0);
 
 	//Cuando terminamos de renderear, cambiamos los buffers.
 	glutSwapBuffers();

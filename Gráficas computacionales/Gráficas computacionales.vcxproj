@@ -133,6 +133,12 @@
   <ItemGroup>
     <Text Include="Prueba.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Default.frag" />
+    <None Include="Default.vert" />
+    <None Include="DiscardCenter.frag" />
+    <None Include="DiscardCenter.vert" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
