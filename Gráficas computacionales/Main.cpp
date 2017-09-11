@@ -199,30 +199,38 @@ GLuint vao;
 //Identificador del manager de los shaders (shaderProgram)
 GLuint shaderProgram;
 
+//float vertsPerframe = 0.0f;
+//float delta = 0.01f;
+
 void Initialize() {
 	//Creando toda la memoria que el programa va a utilizar
 
 	//Creación del atributo de posiciones de estos vertices. Lista de vec2.
 	//Claramente en CPU y RAM
 	std::vector<glm::vec2> positions;
-	positions.push_back(glm::vec2(0, 0));
-	for (int i = 0; i <= 360; i++) {
-		positions.push_back(glm::vec2(glm::cos(glm::radians((float) i)), glm::sin(glm::radians((float) i))));
+	for (int i = 0; i <= 5; i++) {
+		float par = i * 72.0f;
+		positions.push_back(glm::vec2(glm::cos(glm::radians(378.0f - par)), glm::sin(glm::radians(378.0f - par))));
+		positions.push_back(glm::vec2(glm::cos(glm::radians(378.0f - par)) * 0.5f, glm::sin(glm::radians(378.0f - par)) * 0.5f));
 	}
-	//positions.push_back(glm::vec2(0.5f, -0.5f));
-	//positions.push_back(glm::vec2(0.5f, 0.5f));
-	//positions.push_back(glm::vec2(-0.5f, -0.5f));
-	//positions.push_back(glm::vec2(-0.5f, 0.5f));
-
+	positions.push_back(glm::vec2(-0.5f, 0.5f));
 	std::vector<glm::vec3> colors;
-	colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
-	for (int i = 0; i <= 360; i++) {
-		colors.push_back(glm::vec3(glm::cos(glm::radians((float)i)), glm::sin(glm::radians((float)i)), 0.0f));
+	for (int i = 0; i < 12; i++) {
+		float par = i * 78.0f;
+		colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
 	}
-	//colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-	//colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-	//colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+
+	//Posiciones Circulo
+	//positions.push_back(glm::vec2(0, 0));
+	//for (int i = 0; i <= 360; i++) {
+	//	positions.push_back(glm::vec2(glm::cos(glm::radians((float) i)), glm::sin(glm::radians((float) i))));
+	//}
+
+	//Colores Circulo
 	//colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
+	//for (int i = 0; i <= 360; i++) {
+		//colors.push_back(glm::vec3(glm::cos(glm::radians((float)i)), glm::sin(glm::radians((float)i)), 0.0f));
+	//}
 	
 	//Queremos generar 1 manager
 	glGenVertexArrays(1, &vao);
@@ -259,7 +267,7 @@ void Initialize() {
 
 	//VERTEX SHADER
 	//Leemos el archivo Default.vert donde está el código del vertex shader.
-	ifile.Read("DiscardCenter.vert");
+	ifile.Read("Default.vert");
 	//Obtenemos el código fuente y lo guardamos en un string.
 	std::string vertexSource = ifile.GetContents();
 	//Creamos un shader de tipo vertex guardamos su identificador en una variable.
@@ -272,7 +280,7 @@ void Initialize() {
 	//Vamos a asumir que no hay ningún error.
 	glCompileShader(vertexShaderHandle);
 
-	ifile.Read("DiscardCenter.frag");
+	ifile.Read("Default.frag");
 	std::string fragmentSource = ifile.GetContents();
 	GLuint fragmentShaderHandle = glCreateShader(GL_FRAGMENT_SHADER);
 	const GLchar *fragmentSource_c = (const GLchar*)fragmentSource.c_str();
@@ -291,6 +299,12 @@ void Initialize() {
 	glBindAttribLocation(shaderProgram, 1, "VertexColor");
 	//Ejecutamos el proceso de linker (asegurarnos que el vertex y fragment son compatibles)
 	glLinkProgram(shaderProgram);
+
+	//Para configurar un uniform tenemosque decirle a OPENGL que vamos a utilizar el shader program (manager)
+	//glUseProgram(shaderProgram);
+	//GLint uniformLocation = glGetUniformLocation(shaderProgram, "Resolution");
+	//glUniform2f(uniformLocation, 400.0f, 400.0f);
+	//glUseProgram(0);
 }
 
 void GameLoop() {
@@ -312,14 +326,34 @@ void GameLoop() {
 	//Activamos el manager y en este momento se activan todos los VBOs asociados automáticamente.
 	glBindVertexArray(vao);
 	//Función de dibujado sin índices
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 362);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 12);
+	//glDrawArrays(GL_TRIANGLE_FAN, 0, glm::clamp(vertsPerframe, 0.0f, 362.0f)); //circulo
 	//Terminamos de utilizar el manager
 	glBindVertexArray(0);
 	//Desactivamos el manager
 	glUseProgram(0);
 
+	//vertsPerframe += delta;
+	//if (vertsPerframe < 0.0f || vertsPerframe >= 370.0f)
+		//delta *= -1.0f;
+
 	//Cuando terminamos de renderear, cambiamos los buffers.
 	glutSwapBuffers();
+}
+
+void Idle(){
+	//Cuando OpenGl entre en modo de reposo (para guardar bateria, por ejemplo) le decimos qu vuelva a dibujar
+	//Vuelve a mandar a llamar Gameloop
+	glutPostRedisplay();
+}
+
+void ReshapeWindow(int width, int height) {
+	glViewport(0, 0, width, height);
+	//Para configurar un uniform tenemosque decirle a OPENGL que vamos a utilizar el shader program (manager)
+	//glUseProgram(shaderProgram);
+	//GLint uniformLocation = glGetUniformLocation(shaderProgram, "Resolution");
+	//glUniform2f(uniformLocation, width, height);
+	//glUseProgram(0);
 }
 
 int main(int argc, char* argv[]) {
@@ -347,11 +381,22 @@ int main(int argc, char* argv[]) {
 	glutCreateWindow("Hello world GL");
 	//Asociamos una funcion de render. Esta funcion se llamara para dibujar un frame.
 	glutDisplayFunc(GameLoop);
+
+	//Asociamos una función para el cambio de la ventana.  Freeglut la va a mandar a llamar cuando alguien cambie el tamaño de la ventana.
+	glutReshapeFunc(ReshapeWindow);
+	//Asociamos la función que mandará a llamar cuando OpenGL entre modo de reposo.
+	glutIdleFunc(Idle);
 	//Inicializamos GLEW. Esta libreria se encarga de obtener el API de OpenGL de nuestra targeta de video.
 	//Shame on you Microsoft
 	glewInit();
 	//Configurar OpenGL. Este es el color por default del buffer de color en el framebuffer.
 	glClearColor(1.0f, 1.0f, 0.5f, 1.0f);
+
+	glEnable(GL_DEPTH_TEST);
+	//Activamos el borrado de caras traseras. Ahora todos los triangulos que dibujemos deben de estar CCW
+	glEnable(GL_CULL_FACE);
+	//No dibujar las caras traseras de la geometría
+	glCullFace(GL_BACK);
 
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
