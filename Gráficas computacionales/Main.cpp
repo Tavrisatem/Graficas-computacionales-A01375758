@@ -243,7 +243,7 @@ void Initialize() {
 	glGenBuffers(1, &positionsVBO);
 	//Activamos el buffer de posiciones para poder utilizarlo
 	glBindBuffer(GL_ARRAY_BUFFER, positionsVBO);
-	//Creamos la memoria y la inicializamos con los datos del aributo de posiciones
+	//Creamos la memoria y la inicializamos con los datos del atributo de posiciones
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2)*positions.size(), positions.data(), GL_STATIC_DRAW);
 	// Activamos el atributo en l tarjeta de video
 	glEnableVertexAttribArray(0);
