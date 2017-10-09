@@ -186,21 +186,146 @@ int main() {
 	return 0;
 }*/
 
+//Identificador del manager al que vamos a asociar todos los VBOs
+//GLuint vao;
+
+//Identificador del manager de los shaders (shaderProgram)
+//GLuint shaderProgram;
+
+//float vertsPerframe = 0.0f;
+//float delta = 0.01f;
+/*
+
+//Posiciones Circulo
+//positions.push_back(glm::vec2(0, 0));
+//for (int i = 0; i <= 360; i++) {
+//	positions.push_back(glm::vec2(glm::cos(glm::radians((float) i)), glm::sin(glm::radians((float) i))));
+//}
+
+//Colores Circulo
+//colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
+//for (int i = 0; i <= 360; i++) {
+//colors.push_back(glm::vec3(glm::cos(glm::radians((float)i)), glm::sin(glm::radians((float)i)), 0.0f));
+//}
+
+//Queremos generar 1 manager
+glGenVertexArrays(1, &vao);
+//Utilizar el vao. Apartir de este momento, todos los VBOs creados y configurados se van a asociar a este manager
+glBindVertexArray(vao);
+
+//Identificador de VBO de posiciones
+GLuint positionsVBO;
+//Creacion de VBO de posiciones
+glGenBuffers(1, &positionsVBO);
+//Activamos el buffer de posiciones para poder utilizarlo
+glBindBuffer(GL_ARRAY_BUFFER, positionsVBO);
+//Creamos la memoria y la inicializamos con los datos del atributo de posiciones
+glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2)*positions.size(), positions.data(), GL_STATIC_DRAW);
+// Activamos el atributo en l tarjeta de video
+glEnableVertexAttribArray(0);
+// Configuramos los datos del atributo en la target de video
+glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+// Ya no vamos a utilizar este VBO en este  momento.
+glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+GLuint colorsVBO;
+glGenBuffers(1, &colorsVBO);
+glBindBuffer(GL_ARRAY_BUFFER, colorsVBO);
+glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*colors.size(), colors.data(), GL_STATIC_DRAW);
+glEnableVertexAttribArray(1);
+glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+//Desactivamos el manager.
+glBindVertexArray(0);
+
+InputFile ifile;
+//VERTEX SHADER
+//Leemos el archivo Default.vert donde está el código del vertex shader.
+ifile.Read("Default.vert");
+//Obtenemos el código fuente y lo guardamos en un string.
+std::string vertexSource = ifile.GetContents();
+//Creamos un shader de tipo vertex guardamos su identificador en una variable.
+GLuint vertexShaderHandle = glCreateShader(GL_VERTEX_SHADER);
+//Obtener los datos en el formato correcto
+const GLchar *vertexSource_c = (const GLchar*)vertexSource.c_str();
+//Le estamos dando el código fuente a OpenGl para que se lo asigne al shader
+glShaderSource(vertexShaderHandle, 1, &vertexSource_c, nullptr);
+//Compilams el shader en busca de errores.
+//Vamos a asumir que no hay ningún error.
+glCompileShader(vertexShaderHandle);
+
+ifile.Read("Default.frag");
+std::string fragmentSource = ifile.GetContents();
+GLuint fragmentShaderHandle = glCreateShader(GL_FRAGMENT_SHADER);
+const GLchar *fragmentSource_c = (const GLchar*)fragmentSource.c_str();
+glShaderSource(fragmentShaderHandle, 1, &fragmentSource_c, nullptr);
+glCompileShader(fragmentShaderHandle);
+
+//Creamos el identificador para el manager de los shader.
+shaderProgram = glCreateProgram();
+//Adjuntamos el vertex shader al manager (van a trabajar juntos)
+glAttachShader(shaderProgram, vertexShaderHandle);
+//Adjuntamos el fragment shader al manager (van a trabajar juntos)
+glAttachShader(shaderProgram, fragmentShaderHandle);
+//Asociamos un buffer con índice 0 (posiciones) a la variable VertexPosition
+glBindAttribLocation(shaderProgram, 0, "VertexPosition");
+//Asociamos un buffer con índice 1 (colores) a la variable VertexColor
+glBindAttribLocation(shaderProgram, 1, "VertexColor");
+//Ejecutamos el proceso de linker (asegurarnos que el vertex y fragment son compatibles)
+glLinkProgram(shaderProgram);
+
+//Para configurar un uniform tenemosque decirle a OPENGL que vamos a utilizar el shader program (manager)
+//glUseProgram(shaderProgram);
+//GLint uniformLocation = glGetUniformLocation(shaderProgram, "Resolution");
+//glUniform2f(uniformLocation, 400.0f, 400.0f);
+//glUseProgram(0);
+
+
+Game loop
+
+//WARNING!!!! Esto es OpenGL viejito. Solamente lo vamos a ocupar esta clase.
+//Prohibido el resto del sementre.
+//glBegin(GL_TRIANGLES);
+//glColor3f(1.0f, 0.0f, 0.0f);
+//glVertex2f(-1.0f,-1.0f);
+//glColor3f(0.0f, 1.0f, 0.0f);
+//glVertex2f(1.0f, -1.0f);
+//glColor3f(0.0f, 0.0f, 1.0f);
+//glVertex2f(0.0f, 1.0f);
+//glEnd();
+
+//vertsPerframe += delta;
+//if (vertsPerframe < 0.0f || vertsPerframe >= 370.0f)
+//delta *= -1.0f;
+
+// Activamos el vertex shader y el fragment shader utilizando el manager
+glUseProgram(shaderProgram);
+//Activamos el manager y en este momento se activan todos los VBOs asociados automáticamente.
+glBindVertexArray(vao);
+//Función de dibujado sin índices
+glDrawArrays(GL_TRIANGLE_STRIP, 0, 12);
+//glDrawArrays(GL_TRIANGLE_FAN, 0, glm::clamp(vertsPerframe, 0.0f, 362.0f)); //circulo
+//Terminamos de utilizar el manager
+glBindVertexArray(0);
+//Desactivamos el manager
+glUseProgram(0);
+*/
+
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <iostream>
 #include <glm/glm.hpp>
 #include <vector>
-#include "InputFile.h"
+#include "Mesh.h"
+#include "ShaderProgram.h"
+#include "Transform.h"
+#include "Camara.h"
 
-//Identificador del manager al que vamos a asociar todos los VBOs
-GLuint vao;
-
-//Identificador del manager de los shaders (shaderProgram)
-GLuint shaderProgram;
-
-//float vertsPerframe = 0.0f;
-//float delta = 0.01f;
+Mesh _mesh;
+ShaderProgram _shaderProgram;
+Transform _transform;
+Camara _camara;
 
 void Initialize() {
 	//Creando toda la memoria que el programa va a utilizar
@@ -213,129 +338,41 @@ void Initialize() {
 		positions.push_back(glm::vec2(glm::cos(glm::radians(378.0f - par)), glm::sin(glm::radians(378.0f - par))));
 		positions.push_back(glm::vec2(glm::cos(glm::radians(378.0f - par)) * 0.5f, glm::sin(glm::radians(378.0f - par)) * 0.5f));
 	}
-	positions.push_back(glm::vec2(-0.5f, 0.5f));
+
 	std::vector<glm::vec3> colors;
 	for (int i = 0; i < 12; i++) {
-		float par = i * 78.0f;
 		colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
 	}
 
-	//Posiciones Circulo
-	//positions.push_back(glm::vec2(0, 0));
-	//for (int i = 0; i <= 360; i++) {
-	//	positions.push_back(glm::vec2(glm::cos(glm::radians((float) i)), glm::sin(glm::radians((float) i))));
-	//}
+	_mesh.CreateMesh(12);
+	_mesh.SetPositionAttribute(positions, GL_STATIC_DRAW, 0);
+	_mesh.SetColorAttribute(colors, GL_STATIC_DRAW, 1);
 
-	//Colores Circulo
-	//colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
-	//for (int i = 0; i <= 360; i++) {
-		//colors.push_back(glm::vec3(glm::cos(glm::radians((float)i)), glm::sin(glm::radians((float)i)), 0.0f));
-	//}
-	
-	//Queremos generar 1 manager
-	glGenVertexArrays(1, &vao);
-	//Utilizar el vao. Apartir de este momento, todos los VBOs creados y configurados se van a asociar a este manager
-	glBindVertexArray(vao);
+	_shaderProgram.CreateProgram();
+	_shaderProgram.SetAttribute(0, "VertexPosition");
+	_shaderProgram.SetAttribute(1, "VertexColor");
+	_shaderProgram.AttachShader("Default.vert", GL_VERTEX_SHADER);
+	_shaderProgram.AttachShader("Default.frag", GL_FRAGMENT_SHADER);
+	_shaderProgram.LinkProgram();
 
-	//Identificador de VBO de posiciones
-	GLuint positionsVBO;
-	//Creacion de VBO de posiciones
-	glGenBuffers(1, &positionsVBO);
-	//Activamos el buffer de posiciones para poder utilizarlo
-	glBindBuffer(GL_ARRAY_BUFFER, positionsVBO);
-	//Creamos la memoria y la inicializamos con los datos del atributo de posiciones
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2)*positions.size(), positions.data(), GL_STATIC_DRAW);
-	// Activamos el atributo en l tarjeta de video
-	glEnableVertexAttribArray(0);
-	// Configuramos los datos del atributo en la target de video
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-	// Ya no vamos a utilizar este VBO en este  momento.
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//_transform.SetRotation(0.0f, 0.0f, 90.0f);
 
-	GLuint colorsVBO;
-	glGenBuffers(1, &colorsVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, colorsVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*colors.size(), colors.data(), GL_STATIC_DRAW);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	//Desactivamos el manager.
-	glBindVertexArray(0);
-
-	InputFile ifile;
-
-	//VERTEX SHADER
-	//Leemos el archivo Default.vert donde está el código del vertex shader.
-	ifile.Read("Default.vert");
-	//Obtenemos el código fuente y lo guardamos en un string.
-	std::string vertexSource = ifile.GetContents();
-	//Creamos un shader de tipo vertex guardamos su identificador en una variable.
-	GLuint vertexShaderHandle = glCreateShader(GL_VERTEX_SHADER);
-	//Obtener los datos en el formato correcto
-	const GLchar *vertexSource_c = (const GLchar*)vertexSource.c_str();
-	//Le estamos dando el código fuente a OpenGl para que se lo asigne al shader
-	glShaderSource(vertexShaderHandle, 1, &vertexSource_c, nullptr);
-	//Compilams el shader en busca de errores.
-	//Vamos a asumir que no hay ningún error.
-	glCompileShader(vertexShaderHandle);
-
-	ifile.Read("Default.frag");
-	std::string fragmentSource = ifile.GetContents();
-	GLuint fragmentShaderHandle = glCreateShader(GL_FRAGMENT_SHADER);
-	const GLchar *fragmentSource_c = (const GLchar*)fragmentSource.c_str();
-	glShaderSource(fragmentShaderHandle, 1, &fragmentSource_c, nullptr);
-	glCompileShader(fragmentShaderHandle);
-
-	//Creamos el identificador para el manager de los shader.
-	shaderProgram = glCreateProgram();
-	//Adjuntamos el vertex shader al manager (van a trabajar juntos)
-	glAttachShader(shaderProgram, vertexShaderHandle);
-	//Adjuntamos el fragment shader al manager (van a trabajar juntos)
-	glAttachShader(shaderProgram, fragmentShaderHandle);
-	//Asociamos un buffer con índice 0 (posiciones) a la variable VertexPosition
-	glBindAttribLocation(shaderProgram, 0, "VertexPosition");
-	//Asociamos un buffer con índice 1 (colores) a la variable VertexColor
-	glBindAttribLocation(shaderProgram, 1, "VertexColor");
-	//Ejecutamos el proceso de linker (asegurarnos que el vertex y fragment son compatibles)
-	glLinkProgram(shaderProgram);
-
-	//Para configurar un uniform tenemosque decirle a OPENGL que vamos a utilizar el shader program (manager)
-	//glUseProgram(shaderProgram);
-	//GLint uniformLocation = glGetUniformLocation(shaderProgram, "Resolution");
-	//glUniform2f(uniformLocation, 400.0f, 400.0f);
-	//glUseProgram(0);
+	_camara.SetOrthographic(2.0f, 1.0f);
 }
 
 void GameLoop() {
 	//Limpimos el buffer de color y el buffer de profundidad. Siempre hacerlo al inicio del frame.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	//WARNING!!!! Esto es OpenGL viejito. Solamente lo vamos a ocupar esta clase.
-	//Prohibido el resto del sementre.
-	//glBegin(GL_TRIANGLES);
-	//glColor3f(1.0f, 0.0f, 0.0f);
-	//glVertex2f(-1.0f,-1.0f);
-	//glColor3f(0.0f, 1.0f, 0.0f);
-	//glVertex2f(1.0f, -1.0f);
-	//glColor3f(0.0f, 0.0f, 1.0f);
-	//glVertex2f(0.0f, 1.0f);
-	//glEnd();
 
-	// Activamos el vertex shader y el fragment shader utilizando el manager
-	glUseProgram(shaderProgram);
-	//Activamos el manager y en este momento se activan todos los VBOs asociados automáticamente.
-	glBindVertexArray(vao);
-	//Función de dibujado sin índices
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 12);
-	//glDrawArrays(GL_TRIANGLE_FAN, 0, glm::clamp(vertsPerframe, 0.0f, 362.0f)); //circulo
-	//Terminamos de utilizar el manager
-	glBindVertexArray(0);
-	//Desactivamos el manager
-	glUseProgram(0);
 
-	//vertsPerframe += delta;
-	//if (vertsPerframe < 0.0f || vertsPerframe >= 370.0f)
-		//delta *= -1.0f;
+	//_camara.MoveForward(0.001f);
+	_transform.Rotate(0.0f, 0.05f, 0.0f, false);
+
+	_shaderProgram.Activate();
+	//_shaderProgram.SetUniformMatrix("modelMatrix", _transform.GetModelMatrix());
+	_shaderProgram.SetUniformMatrix("mvpMatrix", _camara.GetViewProjection() * _transform.GetModelMatrix());
+	_mesh.Draw(GL_TRIANGLE_STRIP);
+	_shaderProgram.Deactivate();
 
 	//Cuando terminamos de renderear, cambiamos los buffers.
 	glutSwapBuffers();
@@ -405,6 +442,7 @@ int main(int argc, char* argv[]) {
 
 	//Iniciar la aplicacion. El main se pausara 
 	glutMainLoop();
+
 
 	return 0;
 }

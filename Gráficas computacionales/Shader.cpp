@@ -9,10 +9,7 @@ Autor: A01375758 Luis Fernando Espinosa Elizalde
 *********************************************************/
 
 #include "Shader.h"
-#include <GL/glew.h>
-#include <GL/freeglut.h>
-#include <iostream>
-#include <glm/glm.hpp>
+
 #include <vector>
 #include "InputFile.h"
 
@@ -28,17 +25,18 @@ Shader::~Shader()
 
 void Shader::CreateShader(std::string path, GLenum type)
 {
-	if (_shaderHandle != 0) {
-		glDeleteShader(_shaderHandle);
-	}
 	InputFile ifile;
 	//VERTEX SHADER
 	//Leemos el archivo Default.vert donde está el código del vertex shader.
-	ifile.Read(path);
+	if (ifile.Read(path)) std::cout << "File " << path << " opened successfully" << std::endl;
 	//Obtenemos el código fuente y lo guardamos en un string.
 	std::string vertexSource = ifile.GetContents();
+	std::cout << vertexSource << std::endl;
+	if (_shaderHandle) {
+		glDeleteShader(_shaderHandle);
+	}
 	//Creamos un shader de tipo vertex guardamos su identificador en una variable.
-	GLuint _shaderHandle = glCreateShader(type);
+	_shaderHandle = glCreateShader(type);
 	//Obtener los datos en el formato correcto
 	const GLchar *vertexSource_c = (const GLchar*)vertexSource.c_str();
 	//Le estamos dando el código fuente a OpenGl para que se lo asigne al shader
