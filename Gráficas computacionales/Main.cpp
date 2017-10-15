@@ -329,24 +329,120 @@ Camara _camara;
 
 void Initialize() {
 	//Creando toda la memoria que el programa va a utilizar
-
+	
 	//Creación del atributo de posiciones de estos vertices. Lista de vec2.
 	//Claramente en CPU y RAM
-	std::vector<glm::vec2> positions;
-	for (int i = 0; i <= 5; i++) {
-		float par = i * 72.0f;
-		positions.push_back(glm::vec2(glm::cos(glm::radians(378.0f - par)), glm::sin(glm::radians(378.0f - par))));
-		positions.push_back(glm::vec2(glm::cos(glm::radians(378.0f - par)) * 0.5f, glm::sin(glm::radians(378.0f - par)) * 0.5f));
-	}
+	std::vector<glm::vec3> positions;
+	//Cara derecha
+	positions.push_back(glm::vec3(3.0f, 0, 3.0f));  //Esquina inferior derecha trasera => 0
+	positions.push_back(glm::vec3(3.0f, 0, -3.0f)); //Esquina superior derecha trasera => 1
+	positions.push_back(glm::vec3(3.0f, 6.0f, -3.0f)); //Esquina superior derecha delantera => 2
+	positions.push_back(glm::vec3(3.0f, 6.0f, 3.0f)); //Esquina inferior derecha delantera => 3, conecta triangulo con 0 y 2
+	//Cara de enfrente
+	positions.push_back(glm::vec3(-3.0f, 0, 3.0f)); //Esquina inferior izquierda delantera => 4
+	positions.push_back(glm::vec3(3.0f, 0, 3.0f)); //Esquina inferior derecha delantera => 5
+	positions.push_back(glm::vec3(3.0f, 6.0f, 3.0f)); //Esquina superior derecha delantera => 6
+	positions.push_back(glm::vec3(-3.0f, 6.0f, 3.0f)); //Esquina superior izquierda delantera => 7, conecta triangulo con 4 y 6
+	//Cara izquierda
+	positions.push_back(glm::vec3(-3.0f, 0, -3.0f)); //Esquina inferior izquierda trasera => 8
+	positions.push_back(glm::vec3(-3.0f, 0, 3.0f)); //Esquina inferior izquierda delantera => 9
+	positions.push_back(glm::vec3(-3.0f, 6.0f, 3.0f)); //Esquina superior izquierda delantera => 10
+	positions.push_back(glm::vec3(-3.0f, 6.0f, -3.0f)); //Esquina superior izquierda trasera => 11, conecta triangulo con 8 y 10
+	//Cara de atras
+	positions.push_back(glm::vec3(3.0f, 0, -3.0f));  //Esquina inferior derecha trasera => 12
+	positions.push_back(glm::vec3(-3.0f, 0, -3.0f)); //Esquina inferior izquierda trasera => 13
+	positions.push_back(glm::vec3(-3.0f, 6.0f, -3.0f)); //Esquina superior izquierda trasera => 14
+	positions.push_back(glm::vec3(3.0f, 6.0f, -3.0f)); //Esquina superior derecha trasera => 15,conecta triangilo con 12 y 14
+	//Cara de abajo
+	positions.push_back(glm::vec3(3.0f, 0, 3.0f)); //Esquina inferior derecha delantera => 16
+	positions.push_back(glm::vec3(-3.0f, 0, 3.0f)); //Esquina inferior izquierda delantera => 17
+	positions.push_back(glm::vec3(-3.0f, 0, -3.0f)); //Esquina inferior izquierda trasera => 18
+	positions.push_back(glm::vec3(3.0f, 0, -3.0f));  //Esquina inferior derecha trasera => 19, conecta trangulo con 16 y 18
+	//Cara de arriba
+	positions.push_back(glm::vec3(3.0f, 6.0f, 3.0f)); //Esquina superior derecha delantera => 20
+	positions.push_back(glm::vec3(-3.0f, 6.0f, -3.0f)); //Esquina superior izquierda trasera => 21
+	positions.push_back(glm::vec3(-3.0f, 6.0f, 3.0f)); //Esquina superior izquierda delantera => 22
+	positions.push_back(glm::vec3(3.0f, 6.0f, -3.0f)); //Esquina superior derecha trasera => 23,conecta triangulo con 20 y 22
+	
 
 	std::vector<glm::vec3> colors;
-	for (int i = 0; i < 12; i++) {
-		colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-	}
+	//Color cara 1
+	colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+	colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+	colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+	colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+	//Color cara 2
+	colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+	colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+	colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+	colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+	//Color cara 3
+	colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+	colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+	colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+	colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+	//Color cara 4
+	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+	//Color cara 5
+	colors.push_back(glm::vec3(1.0f, 0.0f, 1.0f));
+	colors.push_back(glm::vec3(1.0f, 0.0f, 1.0f));
+	colors.push_back(glm::vec3(1.0f, 0.0f, 1.0f));
+	colors.push_back(glm::vec3(1.0f, 0.0f, 1.0f));
+	//Color cara 6
+	colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
+	colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
+	colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
+	colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
+	
+	//Se crea el vector con los índices de las posiciones
+	std::vector<unsigned int> indices = {
+		0, 1, 2, 0, 2, 3, //Cara 1
+		4, 5, 6, 4, 6, 7, //Cara 2
+		8, 9, 10, 8, 10, 11, //Cara 3
+		12, 13, 14, 12, 14, 15, //Cara 4
+		16, 17, 18, 16, 18, 19, //Cara 5
+		20, 21, 22, 20, 23, 21 //Cara 6
+	};
+	
+	/*
+	std::vector<glm::vec3> positions;
+	positions.push_back(glm::vec3(3.0f, 0, 3.0f)); //Esquina inferior derecha delantera => 0
+	positions.push_back(glm::vec3(3.0f, 0, -3.0f));  //Esquina inferior derecha trasera => 1
+	positions.push_back(glm::vec3(-3.0f, 0, -3.0f)); //Esquina inferior izquierda trasera => 2
+	positions.push_back(glm::vec3(-3.0f, 0, 3.0f)); //Esquina inferior izquierda delantera => 3
+	positions.push_back(glm::vec3(3.0f, 6.0f, 3.0f)); //Esquina superior derecha delantera => 4
+	positions.push_back(glm::vec3(3.0f, 6.0f, -3.0f)); //Esquina superior derecha trasera => 5
+	positions.push_back(glm::vec3(-3.0f, 6.0f, -3.0f)); //Esquina superior izquierda trasera => 6
+	positions.push_back(glm::vec3(-3.0f, 6.0f, 3.0f)); //Esquina superior izquierda delantera => 7
 
-	_mesh.CreateMesh(12);
+													   //Solo se necesitan 6 colores
+	std::vector<glm::vec3> colors;
+	colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+	colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+	colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+	colors.push_back(glm::vec3(1.0f, 0.0f, 1.0f));
+	colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
+
+
+	//Se crea el vector con los índices de las posiciones
+	std::vector<unsigned int> indices = {
+		0, 1, 5, 0, 5, 4, //Cara 1
+		3, 0, 4, 3, 4, 7, //Cara 2
+		2, 3, 7, 2, 7, 6, //Cara 3
+		1, 2, 6, 1, 6, 5, //Cara 4
+		0, 3, 2, 0, 2, 1, //Cara 5
+		4, 6, 7, 4, 5, 6 //Cara 6
+	};
+	*/
+
+	_mesh.CreateMesh(positions.size());
 	_mesh.SetPositionAttribute(positions, GL_STATIC_DRAW, 0);
 	_mesh.SetColorAttribute(colors, GL_STATIC_DRAW, 1);
+	_mesh.SetIndices(indices, GL_STATIC_DRAW);
 
 	_shaderProgram.CreateProgram();
 	_shaderProgram.SetAttribute(0, "VertexPosition");
@@ -357,7 +453,8 @@ void Initialize() {
 
 	//_transform.SetRotation(0.0f, 0.0f, 90.0f);
 
-	_camara.SetOrthographic(2.0f, 1.0f);
+	_camara.SetPosition(0.0f, 0.0f, 20.0f);
+	//_camara.SetOrthographic(1.0f, 1.0f);
 }
 
 void GameLoop() {
@@ -366,12 +463,12 @@ void GameLoop() {
 
 
 	//_camara.MoveForward(0.001f);
-	_transform.Rotate(0.0f, 0.05f, 0.0f, false);
+	_transform.Rotate(0.01f, 0.01f, 0.01f, false);
 
 	_shaderProgram.Activate();
 	//_shaderProgram.SetUniformMatrix("modelMatrix", _transform.GetModelMatrix());
 	_shaderProgram.SetUniformMatrix("mvpMatrix", _camara.GetViewProjection() * _transform.GetModelMatrix());
-	_mesh.Draw(GL_TRIANGLE_STRIP);
+	_mesh.Draw(GL_TRIANGLES);
 	_shaderProgram.Deactivate();
 
 	//Cuando terminamos de renderear, cambiamos los buffers.

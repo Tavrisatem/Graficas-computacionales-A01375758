@@ -17,6 +17,8 @@ Mesh::Mesh()
 	_positionsVertexBufferObject = 0;
 	_colorsVertexBufferObject = 0;
 	_vertexCount = 0;
+	_indicesBufferObject = 0;
+	_indicesCount = 0;
 }
 
 Mesh::~Mesh()
@@ -37,8 +39,14 @@ void Mesh::CreateMesh(GLint vertexCount)
 void Mesh::Draw(GLenum primitive)
 {
 	glBindVertexArray(_vertexArrayObject);
-	//Función de dibujado sin índices
-	glDrawArrays(primitive, 0, _vertexCount);
+	if (_indicesCount > 0) {
+		//Función de dibujado con índices
+		glDrawElements(primitive, _indicesCount, GL_UNSIGNED_INT, nullptr);
+	}
+	else {
+		//Función de dibujado sin índices
+		glDrawArrays(primitive, 0, _vertexCount);
+	}
 	glBindVertexArray(0);
 }
 
@@ -68,6 +76,23 @@ void Mesh::SetColorAttribute(std::vector<glm::vec4> color, GLenum usage, GLuint 
 	if (color.size() > 0 && color.size() == _vertexCount)
 		SetAttributeData(_colorsVertexBufferObject, sizeof(glm::vec4) * color.size(), color.data(), usage, locationIndex, 4);
 
+}
+
+void Mesh::SetIndices(std::vector<unsigned int> indices, GLenum usage)
+{
+	if (indices.size() == 0) {
+		return;
+	}
+	_indicesCount = indices.size();
+	if (_indicesBufferObject != 0) {
+		_indicesBufferObject = 0;
+	}
+	std::cout << _indicesCount<<"perror";
+	glBindVertexArray(_vertexArrayObject);
+	glGenBuffers(1, &_indicesBufferObject);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indicesBufferObject);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*_indicesCount, indices.data(), usage);
+	glBindVertexArray(0);
 }
 
 void Mesh::SetAttributeData(GLuint & buffer, const GLsizeiptr size, const void* data, GLenum usage, GLuint locationIndex, const GLint components)

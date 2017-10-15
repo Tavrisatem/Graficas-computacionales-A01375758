@@ -31,7 +31,6 @@ void Shader::CreateShader(std::string path, GLenum type)
 	if (ifile.Read(path)) std::cout << "File " << path << " opened successfully" << std::endl;
 	//Obtenemos el código fuente y lo guardamos en un string.
 	std::string vertexSource = ifile.GetContents();
-	std::cout << vertexSource << std::endl;
 	if (_shaderHandle) {
 		glDeleteShader(_shaderHandle);
 	}

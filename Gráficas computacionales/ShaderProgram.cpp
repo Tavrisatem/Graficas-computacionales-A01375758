@@ -43,7 +43,6 @@ void ShaderProgram::LinkProgram()
 	for (int i=0; i < _attachedShaders.size(); i++) {
 		glAttachShader(_programHandle, _attachedShaders[i]->GetHandle());
 	}
-	std::cout << _attachedShaders.size() << std::endl;
 	glLinkProgram(_programHandle);
 	DeleteAndDetachShaders();
 }
