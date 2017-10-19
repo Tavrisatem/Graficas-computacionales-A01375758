@@ -1,3 +1,14 @@
+/*********************************************************
+
+Materia: Gráficas Computacionales
+
+Fecha: 23 de octubre de 2017
+
+Autor: A01375758 Luis Fernando Espinosa Elizalde
+	   A01375640 Brandon Alain Cruz Ruiz
+
+*********************************************************/
+
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <iostream>
