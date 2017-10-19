@@ -1,3 +1,186 @@
+#include <GL/glew.h>
+#include <GL/freeglut.h>
+#include <iostream>
+#include <glm/glm.hpp>
+#include <vector>
+#include "Mesh.h"
+#include "ShaderProgram.h"
+#include "Transform.h"
+#include "Camara.h"
+
+Mesh _mesh;
+ShaderProgram _shaderProgram;
+Transform _transform;
+Transform _transform2;
+Camara _camara;
+float _angulo = 0;
+int flag = 1;
+
+void Initialize() {
+	//Creando toda la memoria que el programa va a utilizar
+
+	//Creación del atributo de posiciones de estos vertices. Lista de vec2.
+	//Claramente en CPU y RAM
+	std::vector<glm::vec3> positions;
+
+	std::vector<glm::vec3> colors;
+
+	//Posiciones de vertices del triangulo
+	positions.push_back(glm::vec3(1.0f, -1.0f, 1.0f)); //Esquina inferior derecha delantera => 0
+	positions.push_back(glm::vec3(-1.0f, -1.0f, 1.0f)); //Esquina inferior izquierda delantera => 1
+	positions.push_back(glm::vec3(-1.0f, -1.0f, -1.0f)); //Esquina inferior izquierda trasera => 2
+	positions.push_back(glm::vec3(1.0f, -1.0f, -1.0f));  //Esquina inferior derecha trasera => 3
+	positions.push_back(glm::vec3(0.0f, 1.0f, 0.0f));  //Punta superior => 4
+
+													   //Colores de vétices
+	colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f)); //Color vértice 0
+	colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f)); //Color vértice 1
+	colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f)); //Color vértice 2
+	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f)); //Color vértice 3
+	colors.push_back(glm::vec3(1.0f, 0.0f, 1.0f)); //Color vértice 4
+
+												   //Se crea el vector con los índices de las posiciones
+	std::vector<unsigned int> indices = {
+		0, 4, 1, //Cara enfrente pirámide
+		1, 4, 2, //Cara izquierda pirámide
+		2, 4, 3,  //Cara atrás pirámide
+		3, 4, 0, //Cara derecha pirámide
+		0, 1, 3, 0, 3, 2 //Cuadrádo de base
+	};
+
+
+	_mesh.CreateMesh(positions.size());
+	_mesh.SetPositionAttribute(positions, GL_STATIC_DRAW, 0);
+	_mesh.SetColorAttribute(colors, GL_STATIC_DRAW, 1);
+	_mesh.SetIndices(indices, GL_STATIC_DRAW);
+
+	_shaderProgram.CreateProgram();
+	_shaderProgram.SetAttribute(0, "VertexPosition");
+	_shaderProgram.SetAttribute(1, "VertexColor");
+	_shaderProgram.AttachShader("Default.vert", GL_VERTEX_SHADER);
+	_shaderProgram.AttachShader("Default.frag", GL_FRAGMENT_SHADER);
+	_shaderProgram.LinkProgram();
+
+	_transform.SeScale(3.0f, 3.0f, 3.0f); //Escala piramide 1
+	_transform2.SeScale(0.5f, 0.5f, 0.5f); //Escala piramide 2
+	
+	_transform.SetPosition(5.0f * glm::cos(glm::radians((float)0)), 5.0f * glm::sin(glm::radians((float)0)), 0.0f);
+	_transform2.SetPosition(0.0f, 0.0f, 0.0f);
+	//_transform.SetRotation(0.0f, 0.0f, 90.0f);
+
+	_camara.SetPosition(0.0f, 0.0f, 25.0f);
+	//_camara.SetOrthographic(1.0f, 1.0f);
+}
+
+void GameLoop() {
+	//Limpimos el buffer de color y el buffer de profundidad. Siempre hacerlo al inicio del frame.
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//Transformaciones de primer pirámide
+	_transform.Rotate(0.01f, 0.01f, 0.01f, false);
+	_transform.SetPosition(5.0f * glm::cos(glm::radians((float)_angulo)), 5.0f * glm::sin(glm::radians((float)_angulo)), 0.0f);
+	_angulo = _angulo + 0.01f;
+	if (_angulo > 360.0f) {
+		_angulo = 0.0f;
+	}
+	//Transformaciones de segunda pirámide
+	_transform2.Rotate(-0.01f, -0.01f, -0.01f, false);
+	if (flag == 1) {
+		if (_transform2.GetScale().x >= 1.0f) {
+			flag = 0;
+		}
+		_transform2.SeScale(_transform2.GetScale().x + 0.0001f, _transform2.GetScale().y + 0.0001f, _transform2.GetScale().z + 0.0001f);
+	}
+	else {
+		if (_transform2.GetScale().x <= 0.25f) {
+			flag = 1;
+		}
+		_transform2.SeScale(_transform2.GetScale().x - 0.0001f, _transform2.GetScale().y - 0.0001f, _transform2.GetScale().z - 0.0001f);
+	}
+
+	_shaderProgram.Activate();
+	//_shaderProgram.SetUniformMatrix("modelMatrix", _transform.GetModelMatrix());
+	_shaderProgram.SetUniformMatrix("mvpMatrix", _camara.GetViewProjection() * _transform.GetModelMatrix());
+	_mesh.Draw(GL_TRIANGLES);
+	_shaderProgram.Deactivate();
+
+	_shaderProgram.Activate();
+	_shaderProgram.SetUniformMatrix("mvpMatrix", _camara.GetViewProjection() * _transform2.GetModelMatrix());
+	_mesh.Draw(GL_TRIANGLES);
+	_shaderProgram.Deactivate();
+
+	//Cuando terminamos de renderear, cambiamos los buffers.
+	glutSwapBuffers();
+}
+
+void Idle() {
+	//Cuando OpenGl entre en modo de reposo (para guardar bateria, por ejemplo) le decimos qu vuelva a dibujar
+	//Vuelve a mandar a llamar Gameloop
+	glutPostRedisplay();
+}
+
+void ReshapeWindow(int width, int height) {
+	glViewport(0, 0, width, height);
+	//Para configurar un uniform tenemosque decirle a OPENGL que vamos a utilizar el shader program (manager)
+	//glUseProgram(shaderProgram);
+	//GLint uniformLocation = glGetUniformLocation(shaderProgram, "Resolution");
+	//glUniform2f(uniformLocation, width, height);
+	//glUseProgram(0);
+}
+
+int main(int argc, char* argv[]) {
+	//Iniciar fleegut
+	//Freeglut se encarga de crear ventanas
+	// en donde podemos dibujar
+	glutInit(&argc, argv);
+	//Solicitando una versión específica de OpenGL
+	glutInitContextVersion(4, 2);
+	//Iniciar el contexto de OpenGL. El contexto se refiere a las capacidades que va a tener nuestra aplicación gráfica.
+	//En este caso estamos trabajando con el pipeline clasico.
+	//glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);///
+	//En este caso estamos trabajando con el pipeline PROGRAMABLE.
+	glutInitContextProfile(GLUT_CORE_PROFILE);
+	//Freeglut nos permite configurar eventos que ocurren en la ventana.
+	//Un evento que nos interesa es cuando alguien cierra la ventana.
+	//En este caso, dejamos de renderear la escena y terminamos el programa.
+	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
+	//Configuramos el frame buffer . En este caso estamos solicitando un buffer true color RGBA, un buffer de profundidad
+	//y un segundo buffer para renderear.
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
+	//Imiciar las dimensiones de la ventana (en pixeles)
+	glutInitWindowSize(400, 400);
+	//Creamos la ventana y le damos un titulo
+	glutCreateWindow("Hello world GL");
+	//Asociamos una funcion de render. Esta funcion se llamara para dibujar un frame.
+	glutDisplayFunc(GameLoop);
+
+	//Asociamos una función para el cambio de la ventana.  Freeglut la va a mandar a llamar cuando alguien cambie el tamaño de la ventana.
+	glutReshapeFunc(ReshapeWindow);
+	//Asociamos la función que mandará a llamar cuando OpenGL entre modo de reposo.
+	glutIdleFunc(Idle);
+	//Inicializamos GLEW. Esta libreria se encarga de obtener el API de OpenGL de nuestra targeta de video.
+	//Shame on you Microsoft
+	glewInit();
+	//Configurar OpenGL. Este es el color por default del buffer de color en el framebuffer.
+	glClearColor(1.0f, 1.0f, 0.5f, 1.0f);
+
+	glEnable(GL_DEPTH_TEST);
+	//Activamos el borrado de caras traseras. Ahora todos los triangulos que dibujemos deben de estar CCW
+	glEnable(GL_CULL_FACE);
+	//No dibujar las caras traseras de la geometría
+	glCullFace(GL_BACK);
+
+	std::cout << glGetString(GL_VERSION) << std::endl;
+
+	//Configuración inicial de nuetro programa. 
+	Initialize();
+
+	//Iniciar la aplicacion. El main se pausara 
+	glutMainLoop();
+
+
+	return 0;
+}
+
 /*//Luis Fernndo Espinosa Elizalde A01375758
 //Graficas computacionales
 //Tarea 1: Ejercicios simples para aprender C++
@@ -312,238 +495,115 @@ glBindVertexArray(0);
 glUseProgram(0);
 */
 
-#include <GL/glew.h>
-#include <GL/freeglut.h>
-#include <iostream>
-#include <glm/glm.hpp>
-#include <vector>
-#include "Mesh.h"
-#include "ShaderProgram.h"
-#include "Transform.h"
-#include "Camara.h"
-
-Mesh _mesh;
-ShaderProgram _shaderProgram;
-Transform _transform;
-Camara _camara;
-
-void Initialize() {
-	//Creando toda la memoria que el programa va a utilizar
-	
-	//Creación del atributo de posiciones de estos vertices. Lista de vec2.
-	//Claramente en CPU y RAM
-	std::vector<glm::vec3> positions;
-	//Cara derecha
-	positions.push_back(glm::vec3(3.0f, 0, 3.0f));  //Esquina inferior derecha trasera => 0
-	positions.push_back(glm::vec3(3.0f, 0, -3.0f)); //Esquina superior derecha trasera => 1
-	positions.push_back(glm::vec3(3.0f, 6.0f, -3.0f)); //Esquina superior derecha delantera => 2
-	positions.push_back(glm::vec3(3.0f, 6.0f, 3.0f)); //Esquina inferior derecha delantera => 3, conecta triangulo con 0 y 2
-	//Cara de enfrente
-	positions.push_back(glm::vec3(-3.0f, 0, 3.0f)); //Esquina inferior izquierda delantera => 4
-	positions.push_back(glm::vec3(3.0f, 0, 3.0f)); //Esquina inferior derecha delantera => 5
-	positions.push_back(glm::vec3(3.0f, 6.0f, 3.0f)); //Esquina superior derecha delantera => 6
-	positions.push_back(glm::vec3(-3.0f, 6.0f, 3.0f)); //Esquina superior izquierda delantera => 7, conecta triangulo con 4 y 6
-	//Cara izquierda
-	positions.push_back(glm::vec3(-3.0f, 0, -3.0f)); //Esquina inferior izquierda trasera => 8
-	positions.push_back(glm::vec3(-3.0f, 0, 3.0f)); //Esquina inferior izquierda delantera => 9
-	positions.push_back(glm::vec3(-3.0f, 6.0f, 3.0f)); //Esquina superior izquierda delantera => 10
-	positions.push_back(glm::vec3(-3.0f, 6.0f, -3.0f)); //Esquina superior izquierda trasera => 11, conecta triangulo con 8 y 10
-	//Cara de atras
-	positions.push_back(glm::vec3(3.0f, 0, -3.0f));  //Esquina inferior derecha trasera => 12
-	positions.push_back(glm::vec3(-3.0f, 0, -3.0f)); //Esquina inferior izquierda trasera => 13
-	positions.push_back(glm::vec3(-3.0f, 6.0f, -3.0f)); //Esquina superior izquierda trasera => 14
-	positions.push_back(glm::vec3(3.0f, 6.0f, -3.0f)); //Esquina superior derecha trasera => 15,conecta triangilo con 12 y 14
-	//Cara de abajo
-	positions.push_back(glm::vec3(3.0f, 0, 3.0f)); //Esquina inferior derecha delantera => 16
-	positions.push_back(glm::vec3(-3.0f, 0, 3.0f)); //Esquina inferior izquierda delantera => 17
-	positions.push_back(glm::vec3(-3.0f, 0, -3.0f)); //Esquina inferior izquierda trasera => 18
-	positions.push_back(glm::vec3(3.0f, 0, -3.0f));  //Esquina inferior derecha trasera => 19, conecta trangulo con 16 y 18
-	//Cara de arriba
-	positions.push_back(glm::vec3(3.0f, 6.0f, 3.0f)); //Esquina superior derecha delantera => 20
-	positions.push_back(glm::vec3(-3.0f, 6.0f, -3.0f)); //Esquina superior izquierda trasera => 21
-	positions.push_back(glm::vec3(-3.0f, 6.0f, 3.0f)); //Esquina superior izquierda delantera => 22
-	positions.push_back(glm::vec3(3.0f, 6.0f, -3.0f)); //Esquina superior derecha trasera => 23,conecta triangulo con 20 y 22
-	
-
-	std::vector<glm::vec3> colors;
-	//Color cara 1
-	colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-	colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-	colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-	colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-	//Color cara 2
-	colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-	colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-	colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-	colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-	//Color cara 3
-	colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
-	colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
-	colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
-	colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
-	//Color cara 4
-	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
-	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
-	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
-	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
-	//Color cara 5
-	colors.push_back(glm::vec3(1.0f, 0.0f, 1.0f));
-	colors.push_back(glm::vec3(1.0f, 0.0f, 1.0f));
-	colors.push_back(glm::vec3(1.0f, 0.0f, 1.0f));
-	colors.push_back(glm::vec3(1.0f, 0.0f, 1.0f));
-	//Color cara 6
-	colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
-	colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
-	colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
-	colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
-	
-	//Se crea el vector con los índices de las posiciones
-	std::vector<unsigned int> indices = {
-		0, 1, 2, 0, 2, 3, //Cara 1
-		4, 5, 6, 4, 6, 7, //Cara 2
-		8, 9, 10, 8, 10, 11, //Cara 3
-		12, 13, 14, 12, 14, 15, //Cara 4
-		16, 17, 18, 16, 18, 19, //Cara 5
-		20, 21, 22, 20, 23, 21 //Cara 6
-	};
-	
-	/*
-	std::vector<glm::vec3> positions;
-	positions.push_back(glm::vec3(3.0f, 0, 3.0f)); //Esquina inferior derecha delantera => 0
-	positions.push_back(glm::vec3(3.0f, 0, -3.0f));  //Esquina inferior derecha trasera => 1
-	positions.push_back(glm::vec3(-3.0f, 0, -3.0f)); //Esquina inferior izquierda trasera => 2
-	positions.push_back(glm::vec3(-3.0f, 0, 3.0f)); //Esquina inferior izquierda delantera => 3
-	positions.push_back(glm::vec3(3.0f, 6.0f, 3.0f)); //Esquina superior derecha delantera => 4
-	positions.push_back(glm::vec3(3.0f, 6.0f, -3.0f)); //Esquina superior derecha trasera => 5
-	positions.push_back(glm::vec3(-3.0f, 6.0f, -3.0f)); //Esquina superior izquierda trasera => 6
-	positions.push_back(glm::vec3(-3.0f, 6.0f, 3.0f)); //Esquina superior izquierda delantera => 7
-
-													   //Solo se necesitan 6 colores
-	std::vector<glm::vec3> colors;
-	colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-	colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
-	colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
-	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
-	colors.push_back(glm::vec3(1.0f, 0.0f, 1.0f));
-	colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
+/*
+//Cubo 1
+//Cara derecha
+positions.push_back(glm::vec3(3.0f, 0, 3.0f));  //Esquina inferior derecha trasera => 0
+positions.push_back(glm::vec3(3.0f, 0, -3.0f)); //Esquina superior derecha trasera => 1
+positions.push_back(glm::vec3(3.0f, 6.0f, -3.0f)); //Esquina superior derecha delantera => 2
+positions.push_back(glm::vec3(3.0f, 6.0f, 3.0f)); //Esquina inferior derecha delantera => 3, conecta triangulo con 0 y 2
+//Cara de enfrente
+positions.push_back(glm::vec3(-3.0f, 0, 3.0f)); //Esquina inferior izquierda delantera => 4
+positions.push_back(glm::vec3(3.0f, 0, 3.0f)); //Esquina inferior derecha delantera => 5
+positions.push_back(glm::vec3(3.0f, 6.0f, 3.0f)); //Esquina superior derecha delantera => 6
+positions.push_back(glm::vec3(-3.0f, 6.0f, 3.0f)); //Esquina superior izquierda delantera => 7, conecta triangulo con 4 y 6
+//Cara izquierda
+positions.push_back(glm::vec3(-3.0f, 0, -3.0f)); //Esquina inferior izquierda trasera => 8
+positions.push_back(glm::vec3(-3.0f, 0, 3.0f)); //Esquina inferior izquierda delantera => 9
+positions.push_back(glm::vec3(-3.0f, 6.0f, 3.0f)); //Esquina superior izquierda delantera => 10
+positions.push_back(glm::vec3(-3.0f, 6.0f, -3.0f)); //Esquina superior izquierda trasera => 11, conecta triangulo con 8 y 10
+//Cara de atras
+positions.push_back(glm::vec3(3.0f, 0, -3.0f));  //Esquina inferior derecha trasera => 12
+positions.push_back(glm::vec3(-3.0f, 0, -3.0f)); //Esquina inferior izquierda trasera => 13
+positions.push_back(glm::vec3(-3.0f, 6.0f, -3.0f)); //Esquina superior izquierda trasera => 14
+positions.push_back(glm::vec3(3.0f, 6.0f, -3.0f)); //Esquina superior derecha trasera => 15,conecta triangilo con 12 y 14
+//Cara de abajo
+positions.push_back(glm::vec3(3.0f, 0, 3.0f)); //Esquina inferior derecha delantera => 16
+positions.push_back(glm::vec3(-3.0f, 0, 3.0f)); //Esquina inferior izquierda delantera => 17
+positions.push_back(glm::vec3(-3.0f, 0, -3.0f)); //Esquina inferior izquierda trasera => 18
+positions.push_back(glm::vec3(3.0f, 0, -3.0f));  //Esquina inferior derecha trasera => 19, conecta trangulo con 16 y 18
+//Cara de arriba
+positions.push_back(glm::vec3(3.0f, 6.0f, 3.0f)); //Esquina superior derecha delantera => 20
+positions.push_back(glm::vec3(-3.0f, 6.0f, -3.0f)); //Esquina superior izquierda trasera => 21
+positions.push_back(glm::vec3(-3.0f, 6.0f, 3.0f)); //Esquina superior izquierda delantera => 22
+positions.push_back(glm::vec3(3.0f, 6.0f, -3.0f)); //Esquina superior derecha trasera => 23,conecta triangulo con 20 y 2
 
 
-	//Se crea el vector con los índices de las posiciones
-	std::vector<unsigned int> indices = {
-		0, 1, 5, 0, 5, 4, //Cara 1
-		3, 0, 4, 3, 4, 7, //Cara 2
-		2, 3, 7, 2, 7, 6, //Cara 3
-		1, 2, 6, 1, 6, 5, //Cara 4
-		0, 3, 2, 0, 2, 1, //Cara 5
-		4, 6, 7, 4, 5, 6 //Cara 6
-	};
-	*/
+//Cubo 1
+//Color cara 1
+colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+//Color cara 2
+colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+//Color cara 3
+colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+//Color cara 4
+colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+//Color cara 5
+colors.push_back(glm::vec3(1.0f, 0.0f, 1.0f));
+colors.push_back(glm::vec3(1.0f, 0.0f, 1.0f));
+colors.push_back(glm::vec3(1.0f, 0.0f, 1.0f));
+colors.push_back(glm::vec3(1.0f, 0.0f, 1.0f));
+//Color cara 6
+colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
+colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
+colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
+colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
 
-	_mesh.CreateMesh(positions.size());
-	_mesh.SetPositionAttribute(positions, GL_STATIC_DRAW, 0);
-	_mesh.SetColorAttribute(colors, GL_STATIC_DRAW, 1);
-	_mesh.SetIndices(indices, GL_STATIC_DRAW);
+//Se crea el vector con los índices de las posiciones
+std::vector<unsigned int> indices = {
+0, 1, 2, 0, 2, 3, //Cara 1
+4, 5, 6, 4, 6, 7, //Cara 2
+8, 9, 10, 8, 10, 11, //Cara 3
+12, 13, 14, 12, 14, 15, //Cara 4
+16, 17, 18, 16, 18, 19, //Cara 5
+20, 21, 22, 20, 23, 21, //Cara 6
+};
+*/
+//Posiciones de Pirámide
 
-	_shaderProgram.CreateProgram();
-	_shaderProgram.SetAttribute(0, "VertexPosition");
-	_shaderProgram.SetAttribute(1, "VertexColor");
-	_shaderProgram.AttachShader("Default.vert", GL_VERTEX_SHADER);
-	_shaderProgram.AttachShader("Default.frag", GL_FRAGMENT_SHADER);
-	_shaderProgram.LinkProgram();
+/*
+std::vector<glm::vec3> positions;
+positions.push_back(glm::vec3(3.0f, 0, 3.0f)); //Esquina inferior derecha delantera => 0
+positions.push_back(glm::vec3(3.0f, 0, -3.0f));  //Esquina inferior derecha trasera => 1
+positions.push_back(glm::vec3(-3.0f, 0, -3.0f)); //Esquina inferior izquierda trasera => 2
+positions.push_back(glm::vec3(-3.0f, 0, 3.0f)); //Esquina inferior izquierda delantera => 3
+positions.push_back(glm::vec3(3.0f, 6.0f, 3.0f)); //Esquina superior derecha delantera => 4
+positions.push_back(glm::vec3(3.0f, 6.0f, -3.0f)); //Esquina superior derecha trasera => 5
+positions.push_back(glm::vec3(-3.0f, 6.0f, -3.0f)); //Esquina superior izquierda trasera => 6
+positions.push_back(glm::vec3(-3.0f, 6.0f, 3.0f)); //Esquina superior izquierda delantera => 7
 
-	//_transform.SetRotation(0.0f, 0.0f, 90.0f);
-
-	_camara.SetPosition(0.0f, 0.0f, 20.0f);
-	//_camara.SetOrthographic(1.0f, 1.0f);
-}
-
-void GameLoop() {
-	//Limpimos el buffer de color y el buffer de profundidad. Siempre hacerlo al inicio del frame.
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-	//_camara.MoveForward(0.001f);
-	_transform.Rotate(0.01f, 0.01f, 0.01f, false);
-
-	_shaderProgram.Activate();
-	//_shaderProgram.SetUniformMatrix("modelMatrix", _transform.GetModelMatrix());
-	_shaderProgram.SetUniformMatrix("mvpMatrix", _camara.GetViewProjection() * _transform.GetModelMatrix());
-	_mesh.Draw(GL_TRIANGLES);
-	_shaderProgram.Deactivate();
-
-	//Cuando terminamos de renderear, cambiamos los buffers.
-	glutSwapBuffers();
-}
-
-void Idle(){
-	//Cuando OpenGl entre en modo de reposo (para guardar bateria, por ejemplo) le decimos qu vuelva a dibujar
-	//Vuelve a mandar a llamar Gameloop
-	glutPostRedisplay();
-}
-
-void ReshapeWindow(int width, int height) {
-	glViewport(0, 0, width, height);
-	//Para configurar un uniform tenemosque decirle a OPENGL que vamos a utilizar el shader program (manager)
-	//glUseProgram(shaderProgram);
-	//GLint uniformLocation = glGetUniformLocation(shaderProgram, "Resolution");
-	//glUniform2f(uniformLocation, width, height);
-	//glUseProgram(0);
-}
-
-int main(int argc, char* argv[]) {
-	//Iniciar fleegut
-	//Freeglut se encarga de crear ventanas
-	// en donde podemos dibujar
-	glutInit(&argc, argv);
-	//Solicitando una versión específica de OpenGL
-	glutInitContextVersion(4, 2);
-	//Iniciar el contexto de OpenGL. El contexto se refiere a las capacidades que va a tener nuestra aplicación gráfica.
-	//En este caso estamos trabajando con el pipeline clasico.
-	//glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);///
-	//En este caso estamos trabajando con el pipeline PROGRAMABLE.
-	glutInitContextProfile(GLUT_CORE_PROFILE);
-	//Freeglut nos permite configurar eventos que ocurren en la ventana.
-	//Un evento que nos interesa es cuando alguien cierra la ventana.
-	//En este caso, dejamos de renderear la escena y terminamos el programa.
-	glutSetOption(GLUT_ACTION_ON_WINDOW_CLOSE, GLUT_ACTION_GLUTMAINLOOP_RETURNS);
-	//Configuramos el frame buffer . En este caso estamos solicitando un buffer true color RGBA, un buffer de profundidad
-	//y un segundo buffer para renderear.
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
-	//Imiciar las dimensiones de la ventana (en pixeles)
-	glutInitWindowSize(400, 400);
-	//Creamos la ventana y le damos un titulo
-	glutCreateWindow("Hello world GL");
-	//Asociamos una funcion de render. Esta funcion se llamara para dibujar un frame.
-	glutDisplayFunc(GameLoop);
-
-	//Asociamos una función para el cambio de la ventana.  Freeglut la va a mandar a llamar cuando alguien cambie el tamaño de la ventana.
-	glutReshapeFunc(ReshapeWindow);
-	//Asociamos la función que mandará a llamar cuando OpenGL entre modo de reposo.
-	glutIdleFunc(Idle);
-	//Inicializamos GLEW. Esta libreria se encarga de obtener el API de OpenGL de nuestra targeta de video.
-	//Shame on you Microsoft
-	glewInit();
-	//Configurar OpenGL. Este es el color por default del buffer de color en el framebuffer.
-	glClearColor(1.0f, 1.0f, 0.5f, 1.0f);
-
-	glEnable(GL_DEPTH_TEST);
-	//Activamos el borrado de caras traseras. Ahora todos los triangulos que dibujemos deben de estar CCW
-	glEnable(GL_CULL_FACE);
-	//No dibujar las caras traseras de la geometría
-	glCullFace(GL_BACK);
-
-	std::cout << glGetString(GL_VERSION) << std::endl;
-
-	//Configuración inicial de nuetro programa. 
-	Initialize();
-
-	//Iniciar la aplicacion. El main se pausara 
-	glutMainLoop();
+//Solo se necesitan 6 colores
+std::vector<glm::vec3> colors;
+colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+colors.push_back(glm::vec3(0.0f, 1.0f, 0.0f));
+colors.push_back(glm::vec3(0.0f, 0.0f, 1.0f));
+colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+colors.push_back(glm::vec3(1.0f, 0.0f, 1.0f));
+colors.push_back(glm::vec3(1.0f, 1.0f, 1.0f));
 
 
-	return 0;
-}
-
+//Se crea el vector con los índices de las posiciones
+std::vector<unsigned int> indices = {
+0, 1, 5, 0, 5, 4, //Cara 1
+3, 0, 4, 3, 4, 7, //Cara 2
+2, 3, 7, 2, 7, 6, //Cara 3
+1, 2, 6, 1, 6, 5, //Cara 4
+0, 3, 2, 0, 2, 1, //Cara 5
+4, 6, 7, 4, 5, 6 //Cara 6
+};
+*/
 
 /*
 //Luis Fernndo Espinosa Elizalde A01375758
