@@ -94,5 +94,11 @@
     <None Include="DiscardCenter.frag">
       <Filter>Archivos de código fuente\Shadders</Filter>
     </None>
+    <None Include="Luz.frag">
+      <Filter>Archivos de código fuente\Shadders</Filter>
+    </None>
+    <None Include="Luz.vert">
+      <Filter>Archivos de código fuente\Shadders</Filter>
+    </None>
   </ItemGroup>
 </Project>

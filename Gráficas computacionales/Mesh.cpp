@@ -16,6 +16,7 @@ Mesh::Mesh()
 	_vertexArrayObject = 0;
 	_positionsVertexBufferObject = 0;
 	_colorsVertexBufferObject = 0;
+	_normalsVertexBufferObject = 0;
 	_vertexCount = 0;
 	_indicesBufferObject = 0;
 	_indicesCount = 0;
@@ -26,6 +27,7 @@ Mesh::~Mesh()
 	glDeleteVertexArrays(1, &_vertexArrayObject);
 	glDeleteBuffers(1, &_positionsVertexBufferObject);
 	glDeleteBuffers(1, &_colorsVertexBufferObject);
+	glDeleteBuffers(1, &_normalsVertexBufferObject);
 	_vertexCount = 0;
 }
 
@@ -78,6 +80,12 @@ void Mesh::SetColorAttribute(std::vector<glm::vec4> color, GLenum usage, GLuint 
 
 }
 
+void Mesh::SetNormalAttribute(std::vector<glm::vec3> normal, GLenum usage, GLuint locationIndex)
+{
+	if (normal.size() > 0 && normal.size() == _vertexCount)
+		SetAttributeData(_normalsVertexBufferObject, sizeof(glm::vec3) * normal.size(), normal.data(), usage, locationIndex, 3);
+}
+
 void Mesh::SetIndices(std::vector<unsigned int> indices, GLenum usage)
 {
 	if (indices.size() == 0) {
@@ -87,7 +95,7 @@ void Mesh::SetIndices(std::vector<unsigned int> indices, GLenum usage)
 	if (_indicesBufferObject != 0) {
 		_indicesBufferObject = 0;
 	}
-	std::cout << _indicesCount<<"perror";
+	//std::cout << _indicesCount<<"perro";
 	glBindVertexArray(_vertexArrayObject);
 	glGenBuffers(1, &_indicesBufferObject);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indicesBufferObject);
