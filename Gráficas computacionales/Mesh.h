@@ -28,11 +28,13 @@ class Mesh {
 		void SetColorAttribute(std::vector<glm::vec4> color, GLenum usage, GLuint locationIndex);
 		void SetNormalAttribute(std::vector<glm::vec3> normal, GLenum usage, GLuint locationIndex);
 		void SetIndices(std::vector<unsigned int> indices, GLenum usage);
+		void SetTexCoordAttribute(std::vector<glm::vec2> texCoords, GLenum usage, GLuint locationIndex);
 	private:
 		GLuint _vertexArrayObject;
 		GLuint _positionsVertexBufferObject;
 		GLuint _colorsVertexBufferObject;
 		GLuint _normalsVertexBufferObject;
+		GLuint _texCoordsVertexBufferObject;
 		GLint _vertexCount;
 		GLuint _indicesBufferObject;
 		GLint _indicesCount;

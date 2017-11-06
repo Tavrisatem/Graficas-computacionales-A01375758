@@ -14,16 +14,21 @@ Autor: A01375758 Luis Fernando Espinosa Elizalde
 #include <iostream>
 #include <glm/glm.hpp>
 #include <vector>
+#include <IL/il.h>
 #include "Mesh.h"
 #include "ShaderProgram.h"
 #include "Transform.h"
 #include "Camara.h"
+#include "Texture2D.h"
 
 Mesh _mesh;
 ShaderProgram _shaderProgram;
 Transform _transform;
 Transform _transform2;
 Camara _camara;
+Texture2D myTexture;
+Texture2D myTexture2;
+Texture2D myTexture3;
 
 void Initialize() {
 	//Creando toda la memoria que el programa va a utilizar
@@ -33,6 +38,7 @@ void Initialize() {
 	std::vector<glm::vec3> positions;
 	std::vector<glm::vec3> colors;
 	std::vector<glm::vec3> normales;
+	std::vector<glm::vec2> textures;
 
 	//Posiciones Cubo 
 	//Cara derecha
@@ -129,6 +135,38 @@ void Initialize() {
 	normales.push_back(glm::vec3(0.0f, 1.0f, .0f)); //Esquina superior izquierda trasera => 21
 	normales.push_back(glm::vec3(0.0f, 1.0f, .0f)); //Esquina superior izquierda delantera => 22
 	normales.push_back(glm::vec3(0.0f, 1.0f, .0f)); //Esquina superior derecha trasera => 23,conecta triangulo con 20 y 2
+
+	//Texturas Cubo
+	//Cara derecha
+	textures.push_back(glm::vec2(0.0f, 0.0f));  //Esquina inferior derecha trasera => 0
+	textures.push_back(glm::vec2(1.0f, 0.0f)); //Esquina superior derecha trasera => 1
+	textures.push_back(glm::vec2(1.0f, 1.0f)); //Esquina superior derecha delantera => 2
+	textures.push_back(glm::vec2(0.0f, 1.0f)); //Esquina inferior derecha delantera => 3, conecta triangulo con 0 y 2
+	//Cara de enfrente
+	textures.push_back(glm::vec2(0.0f, 0.0f)); //Esquina inferior izquierda delantera => 4
+	textures.push_back(glm::vec2(1.0f, 0.0f)); //Esquina inferior derecha delantera => 5
+	textures.push_back(glm::vec2(1.0f, 1.0f)); //Esquina superior derecha delantera => 6
+	textures.push_back(glm::vec2(0.0f, 1.0f)); //Esquina superior izquierda delantera => 7, conecta triangulo con 4 y 6
+	//Cara izquierda
+	textures.push_back(glm::vec2(0.0f, 0.0f)); //Esquina inferior izquierda trasera => 8
+	textures.push_back(glm::vec2(1.0f, 0.0f)); //Esquina inferior izquierda delantera => 9
+	textures.push_back(glm::vec2(1.0f, 1.0f)); //Esquina superior izquierda delantera => 10
+	textures.push_back(glm::vec2(0.0f, 1.0f)); //Esquina superior izquierda trasera => 11, conecta triangulo con 8 y 10
+	//Cara de atras
+	textures.push_back(glm::vec2(0.0f, 0.0f));  //Esquina inferior derecha trasera => 12
+	textures.push_back(glm::vec2(1.0f, 0.0f)); //Esquina inferior izquierda trasera => 13
+	textures.push_back(glm::vec2(1.0f, 1.0f)); //Esquina superior izquierda trasera => 14
+	textures.push_back(glm::vec2(0.0f, 1.0f)); //Esquina superior derecha trasera => 15,conecta triangilo con 12 y 14
+	//Cara de abajo
+	textures.push_back(glm::vec2(1.0f, 1.0f)); //Esquina inferior derecha delantera => 16
+	textures.push_back(glm::vec2(0.0f, 1.0f)); //Esquina inferior izquierda delantera => 17
+	textures.push_back(glm::vec2(0.0f, 0.0f)); //Esquina inferior izquierda trasera => 18
+	textures.push_back(glm::vec2(1.0f, 0.0f));  //Esquina inferior derecha trasera => 19, conecta trangulo con 16 y 18
+	//Cara de arriba
+	textures.push_back(glm::vec2(1.0f, 0.0f)); //Esquina superior derecha delantera => 20
+	textures.push_back(glm::vec2(0.0f, 1.0f)); //Esquina superior izquierda trasera => 21
+	textures.push_back(glm::vec2(0.0f, 0.0f)); //Esquina superior izquierda delantera => 22
+	textures.push_back(glm::vec2(1.0f, 1.0f)); //Esquina superior derecha trasera => 23,conecta triangulo con 20 y 2
 	
 	//Se crea el vector con los índices de las posiciones
 	std::vector<unsigned int> indices = {
@@ -145,12 +183,14 @@ void Initialize() {
 	_mesh.SetPositionAttribute(positions, GL_STATIC_DRAW, 0);
 	_mesh.SetColorAttribute(colors, GL_STATIC_DRAW, 1);
 	_mesh.SetNormalAttribute(normales, GL_STATIC_DRAW, 2);
+	_mesh.SetTexCoordAttribute(textures, GL_STATIC_DRAW, 3);
 	_mesh.SetIndices(indices, GL_STATIC_DRAW);
 
 	_shaderProgram.CreateProgram();
 	_shaderProgram.SetAttribute(0, "VertexPosition");
 	_shaderProgram.SetAttribute(1, "VertexColor");
 	_shaderProgram.SetAttribute(2, "VertexNormal");
+	_shaderProgram.SetAttribute(3, "VertexTexCoord");
 	_shaderProgram.AttachShader("Luz.vert", GL_VERTEX_SHADER);
 	_shaderProgram.AttachShader("Luz.frag", GL_FRAGMENT_SHADER);
 	_shaderProgram.LinkProgram();
@@ -168,21 +208,34 @@ void GameLoop() {
 	//Limpimos el buffer de color y el buffer de profundidad. Siempre hacerlo al inicio del frame.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	_transform.Rotate(0.01f, 0.01f, 0.01f, false);
+	_transform.Rotate(0.1f, 0.1f, 0.1f, false);
 
 	_shaderProgram.Activate();
+	myTexture.LoadTexture("caja.jpg");
+	//myTexture.LoadTexture("puerco.jpg");
 	_shaderProgram.SetUniformMatrix("modelMatrix", _transform.GetModelMatrix());
 	_shaderProgram.SetUniformMatrix("mvpMatrix", _camara.GetViewProjection() * _transform.GetModelMatrix());
 	_shaderProgram.SetUniformVector("LightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 	_shaderProgram.SetUniformVector("LightPosition", glm::vec3(0, 0, 5.0f));
 	_shaderProgram.SetUniformVector("CamaraPosition", _camara.GetPosition());
+	_shaderProgram.SetUniformi("DiffuseTexture", 0);
+	glActiveTexture(GL_TEXTURE0);
+	myTexture.Bind();
 	_mesh.Draw(GL_TRIANGLES);
+	glActiveTexture(GL_TEXTURE0);
+	myTexture.Unbind();
 	_shaderProgram.Deactivate();
 
 	_shaderProgram.Activate();
+	myTexture2.LoadTexture("piso.jpg");
 	_shaderProgram.SetUniformMatrix("mvpMatrix", _camara.GetViewProjection() * _transform2.GetModelMatrix());
 	_shaderProgram.SetUniformMatrix("modelMatrix", _transform2.GetModelMatrix());
+	_shaderProgram.SetUniformi("DiffuseTexture", 0);
+	glActiveTexture(GL_TEXTURE0);
+	myTexture2.Bind();
 	_mesh.Draw(GL_TRIANGLES);
+	glActiveTexture(GL_TEXTURE0);
+	myTexture2.Unbind();
 	_shaderProgram.Deactivate();
 
 	//Cuando terminamos de renderear, cambiamos los buffers.
@@ -211,6 +264,8 @@ int main(int argc, char* argv[]) {
 	glutInit(&argc, argv);
 	//Solicitando una versión específica de OpenGL
 	glutInitContextVersion(4, 2);
+	// Inicializar DevIL. Esto se debe hacer sólo una vez.
+	ilInit();
 	//Iniciar el contexto de OpenGL. El contexto se refiere a las capacidades que va a tener nuestra aplicación gráfica.
 	//En este caso estamos trabajando con el pipeline clasico.
 	//glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);///
@@ -245,6 +300,15 @@ int main(int argc, char* argv[]) {
 	glEnable(GL_CULL_FACE);
 	//No dibujar las caras traseras de la geometría
 	glCullFace(GL_BACK);
+
+	// Cambiar el punto de origen de las texturas. Por default, DevIL
+	// pone un punto de origen en la esquina superior izquierda.
+	// Esto es compatible con el sistema operativo, pero no con el
+	// funcionamiento de OpenGL.
+	ilEnable(IL_ORIGIN_SET);
+	// Configurar el punto de origen de las texturas en la esquina
+	// inferior izquierda
+	ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
 
 	std::cout << glGetString(GL_VERSION) << std::endl;
 

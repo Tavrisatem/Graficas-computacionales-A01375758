@@ -96,6 +96,13 @@ void ShaderProgram::SetUniformVector(std::string name, glm::vec3 vector)
 {
 	GLint uniformLocation = glGetUniformLocation(_programHandle, name.c_str());
 	glUniform3fv(uniformLocation, 1, glm::value_ptr(vector));
+
+}
+
+void ShaderProgram::SetUniformi(std::string name, GLint texture)
+{
+	GLint uniformLocation = glGetUniformLocation(_programHandle, name.c_str());
+	glUniform1i(uniformLocation, texture);
 }
 
 void ShaderProgram::DeleteAndDetachShaders()
