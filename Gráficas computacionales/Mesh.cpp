@@ -108,7 +108,7 @@ void Mesh::SetIndices(std::vector<unsigned int> indices, GLenum usage)
 void Mesh::SetTexCoordAttribute(std::vector<glm::vec2> texCoords, GLenum usage, GLuint locationIndex)
 {
 	if (texCoords.size() > 0 && texCoords.size() == _vertexCount)
-		SetAttributeData(_normalsVertexBufferObject, sizeof(glm::vec3) * texCoords.size(), texCoords.data(), usage, locationIndex, 2);
+		SetAttributeData(_normalsVertexBufferObject, sizeof(glm::vec2) * texCoords.size(), texCoords.data(), usage, locationIndex, 2);
 }
 
 void Mesh::SetAttributeData(GLuint & buffer, const GLsizeiptr size, const void* data, GLenum usage, GLuint locationIndex, const GLint components)

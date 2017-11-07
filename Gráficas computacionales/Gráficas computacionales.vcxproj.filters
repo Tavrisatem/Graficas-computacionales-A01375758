@@ -106,5 +106,11 @@
     <None Include="Luz.vert">
       <Filter>Archivos de código fuente\Shadders</Filter>
     </None>
+    <None Include="Puerco.vert">
+      <Filter>Archivos de código fuente\Shadders</Filter>
+    </None>
+    <None Include="Puerco.frag">
+      <Filter>Archivos de código fuente\Shadders</Filter>
+    </None>
   </ItemGroup>
 </Project>

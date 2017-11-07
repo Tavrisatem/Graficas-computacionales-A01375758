@@ -152,6 +152,8 @@
     <None Include="DiscardCenter.vert" />
     <None Include="Luz.frag" />
     <None Include="Luz.vert" />
+    <None Include="Puerco.frag" />
+    <None Include="Puerco.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
