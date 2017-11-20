@@ -274,7 +274,7 @@ void GameLoop() {
 
 	_shaderPuerco.Activate();
 	_shaderPuerco.SetUniformMatrix("modelMatrix", _transform.GetModelMatrix());
-	_shaderPuerco.SetUniformMatrix("LightVPMatrix;", _camaraLuz.GetViewProjection());
+	_shaderPuerco.SetUniformMatrix("LightVPMatrix", _camaraLuz.GetViewProjection());
 	_shaderPuerco.SetUniformMatrix("mvpMatrix", _camara.GetViewProjection() * _transform.GetModelMatrix());
 	_shaderPuerco.SetUniformVector("CamaraPosition", _camara.GetPosition());
 	glActiveTexture(GL_TEXTURE0);
@@ -294,7 +294,7 @@ void GameLoop() {
 
 	_shaderProgram.Activate();
 	_shaderProgram.SetUniformMatrix("mvpMatrix", _camara.GetViewProjection() * _transform2.GetModelMatrix());
-	_shaderProgram.SetUniformMatrix("LightVPMatrix;", _camaraLuz.GetViewProjection());
+	_shaderProgram.SetUniformMatrix("LightVPMatrix", _camaraLuz.GetViewProjection());
 	_shaderProgram.SetUniformMatrix("modelMatrix", _transform2.GetModelMatrix());
 	_shaderProgram.SetUniformVector("CamaraPosition", _camara.GetPosition());
 	glActiveTexture(GL_TEXTURE0);
