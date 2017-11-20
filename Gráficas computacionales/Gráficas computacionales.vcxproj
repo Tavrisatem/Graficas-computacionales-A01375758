@@ -118,6 +118,7 @@
   <ItemGroup>
     <ClCompile Include="Camara.cpp" />
     <ClCompile Include="Circle.cpp" />
+    <ClCompile Include="Dephtbuffer.cpp" />
     <ClCompile Include="Employee.cpp" />
     <ClCompile Include="InputFile.cpp" />
     <ClCompile Include="Main.cpp">
@@ -133,6 +134,7 @@
   <ItemGroup>
     <ClInclude Include="Camara.h" />
     <ClInclude Include="Circle.h" />
+    <ClInclude Include="Dephtbuffer.h" />
     <ClInclude Include="Employee.h" />
     <ClInclude Include="InputFile.h" />
     <ClInclude Include="Mesh.h" />
@@ -148,12 +150,18 @@
   <ItemGroup>
     <None Include="Default.frag" />
     <None Include="Default.vert" />
+    <None Include="Depth.frag" />
+    <None Include="Depth.vert" />
     <None Include="DiscardCenter.frag" />
     <None Include="DiscardCenter.vert" />
     <None Include="Luz.frag" />
     <None Include="Luz.vert" />
     <None Include="Puerco.frag" />
     <None Include="Puerco.vert" />
+    <None Include="Shadow.frag" />
+    <None Include="Shadow.vert" />
+    <None Include="ShadowPuerco.frag" />
+    <None Include="ShadowPuerco.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

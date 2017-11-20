@@ -20,16 +20,20 @@ Autor: A01375758 Luis Fernando Espinosa Elizalde
 #include "Transform.h"
 #include "Camara.h"
 #include "Texture2D.h"
+#include "Dephtbuffer.h"
 
 Mesh _mesh;
 ShaderProgram _shaderProgram;
 ShaderProgram _shaderPuerco;
+ShaderProgram _shaderDepth;
 Transform _transform;
 Transform _transform2;
 Camara _camara;
+Camara _camaraLuz;
 Texture2D myTexture;
 Texture2D myTexture2;
 Texture2D myTexture3;
+Dephtbuffer _depthbuffer;
 
 void Initialize() {
 	//Creando toda la memoria que el programa va a utilizar
@@ -179,7 +183,6 @@ void Initialize() {
 		20, 21, 22, 20, 23, 21, //Cara 6
 	};
 
-
 	_mesh.CreateMesh(positions.size());
 	_mesh.SetPositionAttribute(positions, GL_STATIC_DRAW, 0);
 	_mesh.SetColorAttribute(colors, GL_STATIC_DRAW, 1);
@@ -187,19 +190,26 @@ void Initialize() {
 	_mesh.SetTexCoordAttribute(textures, GL_STATIC_DRAW, 3);
 	_mesh.SetIndices(indices, GL_STATIC_DRAW);
 
+	_shaderDepth.CreateProgram();
+	_shaderDepth.SetAttribute(0, "VertexPosition");
+	_shaderDepth.AttachShader("Depth.vert", GL_VERTEX_SHADER);
+	_shaderDepth.AttachShader("Depth.frag", GL_FRAGMENT_SHADER);
+	_shaderDepth.LinkProgram();
+
 	_shaderProgram.CreateProgram();
 	_shaderProgram.SetAttribute(0, "VertexPosition");
 	_shaderProgram.SetAttribute(1, "VertexColor");
 	_shaderProgram.SetAttribute(2, "VertexNormal");
 	_shaderProgram.SetAttribute(3, "VertexTexCoord");
-	_shaderProgram.AttachShader("Luz.vert", GL_VERTEX_SHADER);
-	_shaderProgram.AttachShader("Luz.frag", GL_FRAGMENT_SHADER);
+	_shaderProgram.AttachShader("Shadow.vert", GL_VERTEX_SHADER);
+	_shaderProgram.AttachShader("Shadow.frag", GL_FRAGMENT_SHADER);
 	_shaderProgram.LinkProgram();
 
 	_shaderProgram.Activate();
 	_shaderProgram.SetUniformVector("LightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-	_shaderProgram.SetUniformVector("LightPosition", glm::vec3(0, 0, 5.0f));
+	_shaderProgram.SetUniformVector("LightPosition", glm::vec3(-5.0f, 5.0f, 5.0f));
 	_shaderProgram.SetUniformi("DiffuseTexture", 0);
+	_shaderProgram.SetUniformi("ShadowMap", 1);
 	_shaderProgram.Deactivate();
 
 	_shaderPuerco.CreateProgram();
@@ -207,24 +217,32 @@ void Initialize() {
 	_shaderPuerco.SetAttribute(1, "VertexColor");
 	_shaderPuerco.SetAttribute(2, "VertexNormal");
 	_shaderPuerco.SetAttribute(3, "VertexTexCoord");
-	_shaderPuerco.AttachShader("Puerco.vert", GL_VERTEX_SHADER);
-	_shaderPuerco.AttachShader("Puerco.frag", GL_FRAGMENT_SHADER);
+	_shaderPuerco.AttachShader("ShadowPuerco.vert", GL_VERTEX_SHADER);
+	_shaderPuerco.AttachShader("ShadowPuerco.frag", GL_FRAGMENT_SHADER);
 	_shaderPuerco.LinkProgram();
 
 	_shaderPuerco.Activate();
 	_shaderPuerco.SetUniformVector("LightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-	_shaderPuerco.SetUniformVector("LightPosition", glm::vec3(0, 0, 5.0f));
+	_shaderPuerco.SetUniformVector("LightPosition", glm::vec3(-5.0f, 5.0f, 5.0f));
 	_shaderPuerco.SetUniformi("DiffuseTexture", 0);
 	_shaderPuerco.SetUniformi("DiffuseTexture2", 1);
+	_shaderPuerco.SetUniformi("ShadowMap", 2);
 	_shaderPuerco.Deactivate();
 
+	// Creación y configuración del buffer de profundidad (framebuffer). Resolución de 2048 px.
+	_depthbuffer.Create(2048);
+
 	_transform.SeScale(0.3f, 0.3f, 0.3f); //Escala piramide 1
-	_transform2.SeScale(8.0f,0.01f, 8.0f); //Escala piramide 2
+	_transform2.SeScale(8.0f,0.1f, 8.0f); //Escala piramide 2
 	
 	_transform.SetPosition(0.0f, 0.0f, 0.0f);
-	_transform2.SetPosition(0.0f, -2.0f, 0.0f);
+	_transform2.SetPosition(0.0f, -2.5f, 0.0f);
 
-	_camara.SetPosition(0.0f, 0.0f, 10.0f);
+	_camara.SetPosition(0.0f, 2.0f, 10.0f);
+	_camaraLuz.SetPosition(-3.0f, 5.0f, 5.0f);
+	_camara.Rotate(-20.0f, 0.0f, 0.0f, false);
+	_camaraLuz.SetOrthographic(15.0f, 1.0f);
+	_camaraLuz.Rotate(-75.0f,0.0f, 0.0f, false);
 	
 	myTexture.LoadTexture("caja.jpg");
 	myTexture2.LoadTexture("piso.jpg");
@@ -234,36 +252,62 @@ void Initialize() {
 }
 
 void GameLoop() {
+	_transform.Rotate(0.05f, 0.05f, 0.05f, false);
+	
+	_depthbuffer.Bind();
 	//Limpimos el buffer de color y el buffer de profundidad. Siempre hacerlo al inicio del frame.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	_transform.Rotate(0.05f, 0.05f, 0.05f, false);
+	_shaderDepth.Activate();
+	_shaderDepth.SetUniformMatrix("mvpMatrix", _camaraLuz.GetViewProjection() * _transform.GetModelMatrix());
+	_mesh.Draw(GL_TRIANGLES);
+	_shaderDepth.SetUniformMatrix("mvpMatrix", _camaraLuz.GetViewProjection() * _transform2.GetModelMatrix());
+	_mesh.Draw(GL_TRIANGLES);
+	_shaderDepth.Deactivate();
+
+	_depthbuffer.Unbind();
+	
+	glViewport(0, 0, glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
+	
+	//Limpimos el buffer de color y el buffer de profundidad. Siempre hacerlo al inicio del frame.
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	_shaderPuerco.Activate();
 	_shaderPuerco.SetUniformMatrix("modelMatrix", _transform.GetModelMatrix());
+	_shaderPuerco.SetUniformMatrix("LightVPMatrix;", _camaraLuz.GetViewProjection());
 	_shaderPuerco.SetUniformMatrix("mvpMatrix", _camara.GetViewProjection() * _transform.GetModelMatrix());
 	_shaderPuerco.SetUniformVector("CamaraPosition", _camara.GetPosition());
 	glActiveTexture(GL_TEXTURE0);
 	myTexture.Bind();
 	glActiveTexture(GL_TEXTURE1);
 	myTexture3.Bind();
+	glActiveTexture(GL_TEXTURE2);
+	_depthbuffer.BindDepthMap();
 	_mesh.Draw(GL_TRIANGLES);
 	glActiveTexture(GL_TEXTURE0);
 	myTexture.Unbind();
 	glActiveTexture(GL_TEXTURE1);
 	myTexture3.Unbind();
+	glActiveTexture(GL_TEXTURE2);
+	_depthbuffer.UnbindDepthMap();
 	_shaderPuerco.Deactivate();
 
 	_shaderProgram.Activate();
 	_shaderProgram.SetUniformMatrix("mvpMatrix", _camara.GetViewProjection() * _transform2.GetModelMatrix());
+	_shaderProgram.SetUniformMatrix("LightVPMatrix;", _camaraLuz.GetViewProjection());
 	_shaderProgram.SetUniformMatrix("modelMatrix", _transform2.GetModelMatrix());
 	_shaderProgram.SetUniformVector("CamaraPosition", _camara.GetPosition());
-	//_shaderProgram.SetUniformi("DiffuseTexture", 0);
 	glActiveTexture(GL_TEXTURE0);
 	myTexture2.Bind();
+	//_depthbuffer.BindDepthMap();
+	glActiveTexture(GL_TEXTURE1);
+	_depthbuffer.BindDepthMap();
 	_mesh.Draw(GL_TRIANGLES);
 	glActiveTexture(GL_TEXTURE0);
 	myTexture2.Unbind();
+	//_depthbuffer.UnbindDepthMap();
+	glActiveTexture(GL_TEXTURE1);
+	_depthbuffer.UnbindDepthMap();
 	_shaderProgram.Deactivate();
 
 	//Cuando terminamos de renderear, cambiamos los buffers.

@@ -51,6 +51,9 @@
     <ClCompile Include="Texture2D.cpp">
       <Filter>Archivos de código fuente</Filter>
     </ClCompile>
+    <ClCompile Include="Dephtbuffer.cpp">
+      <Filter>Archivos de código fuente</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Circle.h">
@@ -83,6 +86,9 @@
     <ClInclude Include="Texture2D.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="Dephtbuffer.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="Prueba.txt" />
@@ -110,6 +116,24 @@
       <Filter>Archivos de código fuente\Shadders</Filter>
     </None>
     <None Include="Puerco.frag">
+      <Filter>Archivos de código fuente\Shadders</Filter>
+    </None>
+    <None Include="Shadow.vert">
+      <Filter>Archivos de código fuente\Shadders</Filter>
+    </None>
+    <None Include="Shadow.frag">
+      <Filter>Archivos de código fuente\Shadders</Filter>
+    </None>
+    <None Include="Depth.vert">
+      <Filter>Archivos de código fuente\Shadders</Filter>
+    </None>
+    <None Include="Depth.frag">
+      <Filter>Archivos de código fuente</Filter>
+    </None>
+    <None Include="ShadowPuerco.vert">
+      <Filter>Archivos de código fuente\Shadders</Filter>
+    </None>
+    <None Include="ShadowPuerco.frag">
       <Filter>Archivos de código fuente\Shadders</Filter>
     </None>
   </ItemGroup>
