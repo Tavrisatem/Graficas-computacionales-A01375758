@@ -13,7 +13,7 @@ public:
 
 	void SetPosition(float x, float y, float z);
 	void SetRotation(float x, float y, float z);
-	void SeScale(float x, float y, float z);
+	void SetScale(float x, float y, float z);
 
 	void Translate(float x, float y, float z, bool world);
 	void MoveForward(float delta, bool world);

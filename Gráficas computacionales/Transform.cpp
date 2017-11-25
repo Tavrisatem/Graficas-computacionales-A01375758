@@ -45,7 +45,7 @@ void Transform::SetRotation(float x, float y, float z)
 	UpdateModelMatrixRotationScale();
 }
 
-void Transform::SeScale(float x, float y, float z)
+void Transform::SetScale(float x, float y, float z)
 {
 	_scale = glm::vec3(x, y, z);
 	UpdateModelMatrixRotationScale();
